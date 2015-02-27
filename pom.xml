@@ -24,6 +24,7 @@
     <modules>
         <module>modules/slacker-core</module>
         <module>modules/slacker-api</module>
+        <module>modules/slacker-api-core</module>
         <module>modules/slacker-rs</module>
         <module>modules/slacker-rs-exec</module>
     </modules>

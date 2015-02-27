@@ -2,7 +2,7 @@ package com.labs2160.slacker.rs.admin;
 
 import java.util.Date;
 
-import com.labs2160.slacker.rs.ApplicationStatus;
+import com.labs2160.slacker.core.ApplicationStatus;
 
 public class ServerInfo {
 

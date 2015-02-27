@@ -9,9 +9,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.labs2160.slacker.core.ApplicationManager;
+import com.labs2160.slacker.core.ApplicationStatus;
 import com.labs2160.slacker.core.cdi.Eager;
-import com.labs2160.slacker.rs.ApplicationManager;
-import com.labs2160.slacker.rs.ApplicationStatus;
 
 @Path("admin")
 public class AdminResource {

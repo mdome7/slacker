@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 @Qualifier
-@Target(value = {ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER,     ElementType.TYPE})
+@Target(value = {ElementType.FIELD, ElementType.TYPE})
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface Eager {
 }

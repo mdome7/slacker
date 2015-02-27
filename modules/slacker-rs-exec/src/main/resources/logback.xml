@@ -5,7 +5,7 @@
     </encoder>
   </appender>
   
-  <logger name="com.labs2160.bob.storage" level="DEBUG" />
+  <logger name="com.labs2160.slacker" level="DEBUG" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />
