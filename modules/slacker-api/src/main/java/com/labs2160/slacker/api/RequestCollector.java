@@ -8,7 +8,7 @@ package com.labs2160.slacker.api;
  */
 public interface RequestCollector {
 
-	void start();
+	void start(RequestHandler handler);
 	
 	void shutdown();
 	

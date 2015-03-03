@@ -7,9 +7,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import com.labs2160.slacker.api.InvalidRequestException;
+import com.labs2160.slacker.api.Request;
+import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.core.ApplicationManager;
 import com.labs2160.slacker.core.cdi.Eager;
-import com.labs2160.slacker.core.engine.InvalidRequestException;
 
 @Path("workflows")
 public class WorkflowResource {
@@ -22,8 +24,8 @@ public class WorkflowResource {
 	@Path("{key}")
     public Response submit(@PathParam("key") String key, @FormParam("args") String args) {
     	try {
-    		app.getWorkflowEngine().submitRequest(key, args);
-    		return Response.ok().build();
+    		WorkflowContext ctx = app.getWorkflowEngine().handle(new Request(key, args));
+    		return Response.ok(ctx.getOutputMessage()).build();
     	} catch (InvalidRequestException e) {
     		return Response.status(Response.Status.BAD_REQUEST).build();
     	} catch (Exception e) {

@@ -1,0 +1,110 @@
+{
+    "query": {
+        "count": 1,
+        "created": "2015-02-27T14:57:53Z",
+        "lang": "en-US",
+        "results": {
+            "channel": {
+                "astronomy": {
+                    "sunrise": "6:31 am",
+                    "sunset": "5:41 pm"
+                },
+                "atmosphere": {
+                    "humidity": "50",
+                    "pressure": "30.37",
+                    "rising": "1",
+                    "visibility": "10"
+                },
+                "description": "Yahoo! Weather for East Meadow, NY",
+                "image": {
+                    "height": "18",
+                    "link": "http://weather.yahoo.com",
+                    "title": "Yahoo! Weather",
+                    "url": "http://l.yimg.com/a/i/brand/purplelogo//uh/us/news-wea.gif",
+                    "width": "142"
+                },
+                "item": {
+                    "condition": {
+                        "code": "34",
+                        "date": "Fri, 27 Feb 2015 8:52 am EST",
+                        "temp": "20",
+                        "text": "Fair"
+                    },
+                    "description": "\n<img src=\"http://l.yimg.com/a/i/us/we/52/34.gif\"/><br />\n<b>Current Conditions:</b><br />\nFair, 20 F<BR />\n<BR /><b>Forecast:</b><BR />\nFri - Partly Cloudy. High: 29 Low: 9<br />\nSat - Sunny. High: 29 Low: 15<br />\nSun - Partly Cloudy. High: 35 Low: 30<br />\nMon - AM Clouds/PM Sun. High: 41 Low: 20<br />\nTue - Partly Cloudy. High: 34 Low: 31<br />\n<br />\n<a href=\"http://us.rd.yahoo.com/dailynews/rss/weather/East_Meadow__NY/*http://weather.yahoo.com/forecast/USNY0423_f.html\">Full Forecast at Yahoo! Weather</a><BR/><BR/>\n(provided by <a href=\"http://www.weather.com\" >The Weather Channel</a>)<br/>\n",
+                    "forecast": [
+                        {
+                            "code": "30",
+                            "date": "27 Feb 2015",
+                            "day": "Fri",
+                            "high": "29",
+                            "low": "9",
+                            "text": "Partly Cloudy"
+                        },
+                        {
+                            "code": "32",
+                            "date": "28 Feb 2015",
+                            "day": "Sat",
+                            "high": "29",
+                            "low": "15",
+                            "text": "Sunny"
+                        },
+                        {
+                            "code": "30",
+                            "date": "1 Mar 2015",
+                            "day": "Sun",
+                            "high": "35",
+                            "low": "30",
+                            "text": "Partly Cloudy"
+                        },
+                        {
+                            "code": "30",
+                            "date": "2 Mar 2015",
+                            "day": "Mon",
+                            "high": "41",
+                            "low": "20",
+                            "text": "AM Clouds/PM Sun"
+                        },
+                        {
+                            "code": "30",
+                            "date": "3 Mar 2015",
+                            "day": "Tue",
+                            "high": "34",
+                            "low": "31",
+                            "text": "Partly Cloudy"
+                        }
+                    ],
+                    "guid": {
+                        "content": "USNY0423_2015_03_03_7_00_EST",
+                        "isPermaLink": "false"
+                    },
+                    "lat": "40.72",
+                    "link": "http://us.rd.yahoo.com/dailynews/rss/weather/East_Meadow__NY/*http://weather.yahoo.com/forecast/USNY0423_f.html",
+                    "long": "-73.56",
+                    "pubDate": "Fri, 27 Feb 2015 8:52 am EST",
+                    "title": "Conditions for East Meadow, NY at 8:52 am EST"
+                },
+                "language": "en-us",
+                "lastBuildDate": "Fri, 27 Feb 2015 8:52 am EST",
+                "link": "http://us.rd.yahoo.com/dailynews/rss/weather/East_Meadow__NY/*http://weather.yahoo.com/forecast/USNY0423_f.html",
+                "location": {
+                    "city": "East Meadow",
+                    "country": "United States",
+                    "region": "NY"
+                },
+                "title": "Yahoo! Weather - East Meadow, NY",
+                "ttl": "60",
+                "units": {
+                    "distance": "mi",
+                    "pressure": "in",
+                    "speed": "mph",
+                    "temperature": "F"
+                },
+                "wind": {
+                    "chill": "9",
+                    "direction": "360",
+                    "speed": "9"
+                }
+            }
+        }
+    }
+}

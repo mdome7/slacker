@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.hipchat;
+package com.labs2160.slacker.plugin.hipchat;
 
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.WorkflowContext;

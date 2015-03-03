@@ -5,7 +5,7 @@ package com.labs2160.slacker.api;
  * @author mike
  *
  */
-public class WorkflowException extends Exception {
+public class WorkflowException extends SlackerException {
 
 	private static final long serialVersionUID = 7313537574143370074L;
 

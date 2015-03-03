@@ -11,6 +11,7 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.labs2160.slacker.api.RequestHandler;
 import com.labs2160.slacker.core.cdi.Eager;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 

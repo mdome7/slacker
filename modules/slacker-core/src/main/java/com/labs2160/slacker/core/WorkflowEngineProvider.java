@@ -7,7 +7,6 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.labs2160.slacker.api.hipchat.HipChatCollector;
 import com.labs2160.slacker.api.misc.EchoAction;
 import com.labs2160.slacker.api.misc.PrintToConsoleEndpoint;
 import com.labs2160.slacker.api.misc.StockAction;
@@ -15,6 +14,7 @@ import com.labs2160.slacker.api.weather.WeatherAction;
 import com.labs2160.slacker.core.engine.Workflow;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
+import com.labs2160.slacker.plugin.hipchat.HipChatCollector;
 
 /**
  * TODO: convert into a CDI "provider"
@@ -29,15 +29,15 @@ public class WorkflowEngineProvider {
 	public WorkflowEngine provide() {
 		final long start = System.currentTimeMillis();
 		WorkflowEngineImpl engine = new WorkflowEngineImpl();
-		initializeListeners(engine);
+		initializeCollectors(engine);
 		initializeWorkflows(engine);
 		logger.debug("Engine initialized in {} ms", System.currentTimeMillis() - start);
 		return engine;
 	}
 	
-	private void initializeListeners(WorkflowEngineImpl engine) {
-		HipChatCollector hcListener = new HipChatCollector();
-		engine.addRequestListener("HipChat", hcListener);
+	private void initializeCollectors(WorkflowEngineImpl engine) {
+//		HipChatCollector hcListener = new HipChatCollector();
+//		engine.addRequestListener("HipChat", hcListener);
 	}
 	
 	private void initializeWorkflows(WorkflowEngineImpl engine) {

@@ -1,4 +1,4 @@
-package com.labs2160.slacker.core.engine;
+package com.labs2160.slacker.api;
 
 public class InvalidRequestException extends Exception {
 
