@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.weather;
+package com.labs2160.slacker.plugin.weather;
 
 import java.io.IOException;
 import java.util.Map;
@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.WorkflowException;
-import com.labs2160.slacker.api.misc.yahoo.YahooResponse;
+import com.labs2160.slacker.plugin.misc.yahoo.YahooResponse;
 
 /**
  * Arguments: zip_code - 
@@ -54,7 +54,7 @@ public class WeatherAction implements Action {
 			YahooResponse<WeatherResults> response = mapper.readValue(json, new TypeReference<YahooResponse<WeatherResults>>() {});
 	
 			WeatherResults results = response.getResults();
-			ctx.setOutputMessage(results != null ? results.toString() : "Sorry, cannot retrieve weather for: " + input );
+			ctx.setResponseMessage(results != null ? results.toString() : "Sorry, cannot retrieve weather for: " + input );
 		
 		return true;
 		} catch (IOException e) {

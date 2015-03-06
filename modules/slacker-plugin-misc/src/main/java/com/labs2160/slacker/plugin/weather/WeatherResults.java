@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.weather;
+package com.labs2160.slacker.plugin.weather;
 
 import java.util.List;
 

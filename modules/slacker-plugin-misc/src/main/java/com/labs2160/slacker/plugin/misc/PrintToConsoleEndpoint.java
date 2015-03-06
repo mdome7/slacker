@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.misc;
+package com.labs2160.slacker.plugin.misc;
 
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.WorkflowContext;
@@ -8,7 +8,7 @@ public class PrintToConsoleEndpoint implements Endpoint {
 	
 	@Override
 	public boolean execute(WorkflowContext ctx) throws WorkflowException {
-		System.out.println(ctx.getOutputMessage());
+		System.out.println(ctx.getResponseMessage());
 		return true;
 	}
 

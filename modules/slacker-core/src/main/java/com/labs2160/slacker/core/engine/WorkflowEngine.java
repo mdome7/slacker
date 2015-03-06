@@ -20,5 +20,7 @@ public interface WorkflowEngine extends RequestHandler {
 	 */
 	WorkflowContext handle(Request request) throws InvalidRequestException, WorkflowException;
 	
+	WorkflowMetadata [] getWorkflowMetadata();
+	
 	void shutdown();
 }

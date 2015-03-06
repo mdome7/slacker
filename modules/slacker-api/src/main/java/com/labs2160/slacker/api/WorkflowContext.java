@@ -14,7 +14,7 @@ public class WorkflowContext {
 
 	private String [] workflowArgs;
 	
-	private String outputMessage;
+	private String responseMessage;
 
 	private Map<String,Object> values;
 	
@@ -22,10 +22,7 @@ public class WorkflowContext {
 		if (key == null || key.length() == 0) {
 			throw new IllegalArgumentException("Workflow key is required.");
 		}
-		if (requestArgs == null || requestArgs.length < 1) {
-			throw new IllegalArgumentException("Workflow arguments are required.");
-		}
-		this.workflowArgs = requestArgs;
+		this.workflowArgs = requestArgs == null ? new String[0] : requestArgs;
 		this.values = new ConcurrentHashMap<>();
 	}
 	
@@ -37,12 +34,12 @@ public class WorkflowContext {
 		return workflowArgs;
 	}
 
-	public String getOutputMessage() {
-		return outputMessage;
+	public String getResponseMessage() {
+		return responseMessage;
 	}
 
-	public void setOutputMessage(String outputMessage) {
-		this.outputMessage = outputMessage;
+	public void setResponseMessage(String outputMessage) {
+		this.responseMessage = outputMessage;
 	}
 	
 	public void addValue(String key, Object value) {

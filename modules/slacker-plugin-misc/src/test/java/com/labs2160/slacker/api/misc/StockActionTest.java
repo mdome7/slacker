@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.WorkflowException;
+import com.labs2160.slacker.plugin.misc.StockAction;
 
 public class StockActionTest {
 	
@@ -34,6 +35,6 @@ public class StockActionTest {
 	private String getStock(String symbol) throws WorkflowException {
 		WorkflowContext ctx = new WorkflowContext("stock", symbol);
 		Assert.assertTrue(action.execute(ctx));
-		return ctx.getOutputMessage();
+		return ctx.getResponseMessage();
 	}
 }

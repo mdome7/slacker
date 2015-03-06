@@ -7,17 +7,17 @@ package com.labs2160.slacker.api;
  */
 public class Request {
 
-	private String key;
+	private String source;
 	
 	private String [] args;
-	
-	public Request(String key, String ... args) {
-		this.key = key;
+
+	public Request(String source, String ... args) {
+		this.source = source;
 		this.args = args;
 	}
 
-	public String getKey() {
-		return key;
+	public String getSource() {
+		return source;
 	}
 
 	public String[] getArgs() {

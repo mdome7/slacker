@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.misc;
+package com.labs2160.slacker.plugin.misc;
 
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.WorkflowContext;
@@ -8,13 +8,13 @@ public class EchoAction implements Action {
 
 	@Override
 	public boolean execute(WorkflowContext ctx) throws WorkflowException {
-		String [] requestArgs = ctx.getWorkflowArgs();
+		String [] args = ctx.getWorkflowArgs();
 		StringBuilder sb = new StringBuilder("Message:");
-		for (int i = 0; i < requestArgs.length; i++) {
+		for (int i = 0; i < args.length; i++) {
 			sb.append(" ");
-			sb.append(requestArgs[i]);
+			sb.append(args[i]);
 		}
-		ctx.setOutputMessage(sb.toString());
+		ctx.setResponseMessage(sb.toString());
 		return true;
 	}
 

@@ -16,10 +16,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.WorkflowException;
-import com.labs2160.slacker.api.misc.yahoo.YahooResponse;
-import com.labs2160.slacker.api.weather.WeatherAction;
-import com.labs2160.slacker.api.weather.WeatherResults;
-import com.labs2160.slacker.api.weather.WeatherResults.Forecast;
+import com.labs2160.slacker.plugin.misc.yahoo.YahooResponse;
+import com.labs2160.slacker.plugin.weather.WeatherAction;
+import com.labs2160.slacker.plugin.weather.WeatherResults;
+import com.labs2160.slacker.plugin.weather.WeatherResults.Forecast;
 
 public class WeatherActionTest {
 
@@ -69,6 +69,6 @@ public class WeatherActionTest {
 	private String getWeather(String text) throws WorkflowException {
 		WorkflowContext ctx = new WorkflowContext("Weather", text);
 		Assert.assertTrue(action.execute(ctx));
-		return ctx.getOutputMessage();
+		return ctx.getResponseMessage();
 	}
 }

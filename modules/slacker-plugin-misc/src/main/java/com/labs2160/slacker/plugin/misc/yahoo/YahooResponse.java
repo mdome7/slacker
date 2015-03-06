@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.misc.yahoo;
+package com.labs2160.slacker.plugin.misc.yahoo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

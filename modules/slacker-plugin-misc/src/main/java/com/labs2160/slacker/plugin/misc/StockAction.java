@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.misc;
+package com.labs2160.slacker.plugin.misc;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -62,7 +62,7 @@ public class StockAction implements Action {
 		StockInfoResponse stock = target.queryParam("q", ctx.getWorkflowArgs()[0])
 				.request().accept(MediaType.APPLICATION_JSON_TYPE)
 				.get(StockInfoResponse.class);
-		ctx.setOutputMessage(stock.getResults().price);
+		ctx.setResponseMessage(stock.getResults().price);
 		//ctx.setOutputMessage("87.99");
 		return true;
 	}
