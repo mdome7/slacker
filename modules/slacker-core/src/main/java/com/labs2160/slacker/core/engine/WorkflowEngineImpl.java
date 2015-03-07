@@ -3,6 +3,10 @@ package com.labs2160.slacker.core.engine;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +16,19 @@ import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.Request;
 import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.api.ScheduledJob;
 import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.WorkflowException;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
 	
 	private final static Logger logger = LoggerFactory.getLogger(WorkflowEngineImpl.class);
+	
+	private final static long INITIAL_SCHEDULE_DELAY_SEC = 10;
 
+	/** scheduler for jobs */
+	private ScheduledExecutorService scheduler;
+	
 	/** in-memory registry of all workflows */
 	private Map<String,Workflow> workflows = new ConcurrentHashMap<>();
 
@@ -53,11 +63,25 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 	public void start() {
 		long start = System.currentTimeMillis();
 		logger.debug("Starting engine...");
+
+		scheduler = Executors.newScheduledThreadPool(1);
+		
 		for (String collectorName : collectors.keySet()) {
 			try {
 				logger.debug("Starting collector: {}", collectorName);
 				RequestCollector collector = collectors.get(collectorName);
 				collector.start(this);
+				
+				ScheduledJob [] jobs = collector.getScheduledJobs();
+				if (jobs != null) {
+					for (ScheduledJob job : jobs) {
+						logger.debug("Scheduling job for {} with perio of {} s", collectorName, job.getPeriod());
+						ScheduledFuture<?> jobFuture = scheduler.scheduleAtFixedRate(
+								job, INITIAL_SCHEDULE_DELAY_SEC, job.getPeriod(), TimeUnit.SECONDS);
+						// TODO: keep track of jobFutures per collector if we want collectors to be shutdown at runtime
+					}
+				}
+				
 			} catch (Exception e) {
 				logger.error("Could not start collector {} due to error.", collectorName, e);
 				logger.warn("Skipping collector {} but will continue startup.", collectorName);
@@ -75,7 +99,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 		}
 	}
 	
-	public void addRequestListener(String key, RequestCollector collector) {
+	public void addCollector(String key, RequestCollector collector) {
 		collectors.put(key, collector);
 		logger.info("Collector \"{}\" added", key);
 	}

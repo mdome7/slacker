@@ -47,7 +47,7 @@ public class WorkflowEngineProvider {
 	private void initializeCollectors(WorkflowEngineImpl engine, Properties config) {
 		HipChatCollector hcListener = new HipChatCollector(config.getProperty("xmpp.host"),
 				config.getProperty("xmpp.user"), config.getProperty("xmpp.password"));
-		engine.addRequestListener("HipChat", hcListener);
+		engine.addCollector("HipChat", hcListener);
 	}
 	
 	private void initializeWorkflows(WorkflowEngineImpl engine, Properties config) {

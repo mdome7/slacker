@@ -1,6 +1,8 @@
 package com.labs2160.slacker.core;
 
 import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -11,7 +13,6 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.labs2160.slacker.api.RequestHandler;
 import com.labs2160.slacker.core.cdi.Eager;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 
@@ -27,7 +28,6 @@ import com.labs2160.slacker.core.engine.WorkflowEngine;
 public class ApplicationManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationManager.class);
-
 	private ApplicationStatus status;
 
 	private Date startDate;

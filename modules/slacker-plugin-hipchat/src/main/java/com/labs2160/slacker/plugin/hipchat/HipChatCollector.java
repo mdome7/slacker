@@ -2,6 +2,7 @@ package com.labs2160.slacker.plugin.hipchat;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
@@ -21,6 +22,7 @@ import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.Request;
 import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.RequestHandler;
+import com.labs2160.slacker.api.ScheduledJob;
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.WorkflowContext;
 
@@ -37,14 +39,20 @@ import com.labs2160.slacker.api.WorkflowContext;
  */
 public class HipChatCollector implements RequestCollector, ChatManagerListener, ChatMessageListener {
 	
+	/** period betwen empty messages sent to HipChat server to keep connection alive */
+	private final static int KEEP_ALIVE_PERIOD_SEC = 90;
+	
 	private final static Logger logger = LoggerFactory.getLogger(HipChatCollector.class);
 	
 	private XMPPTCPConnection conn;
 	
 	private RequestHandler handler;
+	
+	/** chat used for keepalive messages */
+	private Chat keepAliveChat;
 
 	/** Jabber ID */
-	private String jid;
+	private String username;
 	
 	public HipChatCollector(String host, String username, String password) {
 		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder()
@@ -55,6 +63,7 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 				.setConnectTimeout(10000)
 				.setSendPresence(true)
 				.build();
+		this.username = username;
 		conn = new XMPPTCPConnection(config);
 	}
 
@@ -65,6 +74,9 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 			logger.debug("Connecting to server {}", conn.getHost());
 			conn.connect();
 			conn.login();
+			
+			this.keepAliveChat = ChatManager.getInstanceFor(conn).createChat(username);
+			
 			ChatManager.getInstanceFor(conn).addChatListener(this);
 			logger.info("HipChat state: connected={}, authenticated={}", conn.isAuthenticated(), conn.isAuthenticated());
 		} catch (SmackException | IOException | XMPPException e) {
@@ -131,5 +143,17 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 		} catch (NotConnectedException e1) {
 			logger.error("Cannot send error reply back to chat; {}", e1.getMessage());
 		}
+	}
+
+	@Override
+	public ScheduledJob [] getScheduledJobs() {
+		ScheduledJob keepAlive = new ScheduledJob(KEEP_ALIVE_PERIOD_SEC) {
+			@Override
+			public void run() {
+				logger.debug("Sending keepalive msg to HipChat server");
+				sendMessage(keepAliveChat, " ");
+			}
+		};
+		return new ScheduledJob [] { keepAlive }; // just one
 	}
 }
