@@ -69,19 +69,17 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 
 	@Override
 	public void start(RequestHandler handler) {
+		this.handler = handler;
+		connect(false);
 		try {
-			this.handler = handler;
-			logger.debug("Connecting to server {}", conn.getHost());
-			conn.connect();
 			conn.login();
-			
-			this.keepAliveChat = ChatManager.getInstanceFor(conn).createChat(username);
-			
-			ChatManager.getInstanceFor(conn).addChatListener(this);
-			logger.info("HipChat state: connected={}, authenticated={}", conn.isAuthenticated(), conn.isAuthenticated());
-		} catch (SmackException | IOException | XMPPException e) {
-			throw new IllegalStateException("Unable to start the collector; " + e.getMessage(), e);
+		} catch (XMPPException | SmackException | IOException e) {
+			throw new IllegalStateException("Cannot login to Hipchat server");
 		}
+		this.keepAliveChat = ChatManager.getInstanceFor(conn).createChat(username); // loopback chat
+		
+		ChatManager.getInstanceFor(conn).addChatListener(this);
+		logger.info("HipChat state: connected={}, authenticated={}", conn.isAuthenticated(), conn.isAuthenticated());
 	}
 
 	@Override
@@ -136,13 +134,39 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 			sendMessage(chat, "Sorry buddy.  I'm not able to help you out right now.");
 		}
 	}
+
+	private boolean sendMessage(Chat chat, String message) {
+		return sendMessage(chat, message, 2);
+	}
 	
-	private void sendMessage(Chat chat, String message) {
+	private boolean sendMessage(Chat chat, String message, int attempts) {
 		try {
 			chat.sendMessage(message);
+			return true;
 		} catch (NotConnectedException e1) {
-			logger.error("Cannot send error reply back to chat; {}", e1.getMessage());
+			logger.error("Cannot send message; {} ({} attempts left)", e1.getMessage(), attempts);
+			if (attempts > 0 && connect(true)) {
+				return sendMessage(chat, message, --attempts); // retry
+			}
+			return false;
 		}
+	}
+	
+	private boolean connect(boolean quietly) {
+		if (! conn.isConnected()) {
+			try {
+				logger.debug("Connecting to server");
+				conn.connect();
+			} catch (SmackException | IOException | XMPPException e) {
+				if (quietly) {
+					logger.warn("Could not connect to server; " + e.getMessage(), e);
+					return false; // connect failed, don't throw Exception
+				} else {
+					throw new IllegalStateException("Cannot connect to server; " + e.getMessage(), e);
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override

@@ -38,7 +38,7 @@ public class WeatherAction implements Action {
 			if (ctx.getWorkflowArgs() == null || ctx.getWorkflowArgs().length == 0) {
 				throw new WorkflowException("Argument is required");
 			}
-			final String input = ctx.getWorkflowArgs()[0].replaceAll("\"", "");
+			final String input = ctx.getWorkflowArgs()[0].replaceAll("[\"|,]", "");
 			String yql = String.format("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"%s\")",
 					input);
 			logger.debug(yql);
