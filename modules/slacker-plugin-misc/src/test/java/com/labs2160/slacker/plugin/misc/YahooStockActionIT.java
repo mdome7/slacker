@@ -1,4 +1,4 @@
-package com.labs2160.slacker.api.misc;
+package com.labs2160.slacker.plugin.misc;
 
 import junit.framework.Assert;
 
@@ -9,17 +9,17 @@ import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.WorkflowException;
-import com.labs2160.slacker.plugin.misc.StockAction;
+import com.labs2160.slacker.plugin.misc.YahooStockAction;
 
-public class StockActionTest {
+public class YahooStockActionIT {
 	
-	private static final Logger logger = LoggerFactory.getLogger(StockActionTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(YahooStockActionIT.class);
 
-	private StockAction action;
+	private YahooStockAction action;
 	
 	@Before
 	public void before() {
-		action = new StockAction();
+		action = new YahooStockAction();
 	}
 	
 	@Test

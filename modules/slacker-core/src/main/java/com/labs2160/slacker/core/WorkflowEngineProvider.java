@@ -18,7 +18,7 @@ import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
 import com.labs2160.slacker.plugin.hipchat.HipChatCollector;
 import com.labs2160.slacker.plugin.misc.EchoAction;
 import com.labs2160.slacker.plugin.misc.PrintToConsoleEndpoint;
-import com.labs2160.slacker.plugin.misc.StockAction;
+import com.labs2160.slacker.plugin.misc.MarkitStockAction;
 import com.labs2160.slacker.plugin.weather.WeatherAction;
 
 /**
@@ -59,7 +59,7 @@ public class WorkflowEngineProvider {
 		engine.addWorkflow("echo", wf1);
 
 		Workflow wf2 = new Workflow("Stock Price", "Gets the current stock price for the specified symbol");
-		wf2.addAction(new StockAction());
+		wf2.addAction(new MarkitStockAction());
 		wf2.addEndpoint(p2c);
 		engine.addWorkflow("stock", wf2);
 

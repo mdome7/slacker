@@ -15,12 +15,41 @@ import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.WorkflowException;
 
 /**
- * select * from pm.finance where symbol="YHOO"
- * 
- * https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20pm.finance%20where%20symbol%3D%22YHOO%22&format=json&diagnostics=true&callback=
+ * Google returns html:
+ * // [
+{
+"id": "22144"
+,"t" : "AAPL"
+,"e" : "NASDAQ"
+,"l" : "126.60"
+,"l_fix" : "126.60"
+,"l_cur" : "126.60"
+,"s": "2"
+,"ltt":"4:09PM EST"
+,"lt" : "Mar 6, 4:09PM EST"
+,"lt_dts" : "2015-03-06T16:09:55Z"
+,"c" : "+0.19"
+,"c_fix" : "0.19"
+,"cp" : "0.15"
+,"cp_fix" : "0.15"
+,"ccol" : "chg"
+,"pcls_fix" : "126.41"
+,"el": "127.05"
+,"el_fix": "127.05"
+,"el_cur": "127.05"
+,"elt" : "Mar 6, 7:59PM EST"
+,"ec" : "+0.45"
+,"ec_fix" : "0.45"
+,"ecp" : "0.36"
+,"ecp_fix" : "0.36"
+,"eccol" : "chg"
+,"div" : "0.47"
+,"yld" : "1.48"
+}
+]
  *
  */
-public class StockAction implements Action {
+public class GoogleStockAction implements Action {
 	
 	private WebTarget target;
 	
@@ -49,7 +78,7 @@ public class StockAction implements Action {
 		}
 	}
 	
-	public StockAction() {
+	public GoogleStockAction() {
 		Client client = ClientBuilder.newClient(new ClientConfig());
 		target = client.target("http://finance.google.com/finance/info");
 	}
@@ -59,10 +88,14 @@ public class StockAction implements Action {
 		if (ctx.getWorkflowArgs() == null || ctx.getWorkflowArgs().length == 0) {
 			throw new WorkflowException("Stock symbol argument is required");
 		}
-		StockInfoResponse stock = target.queryParam("q", ctx.getWorkflowArgs()[0])
+//		StockInfoResponse stock = target.queryParam("q", ctx.getWorkflowArgs()[0])
+//				.request().accept(MediaType.APPLICATION_JSON_TYPE)
+//				.get(StockInfoResponse.class);
+//		ctx.setResponseMessage(stock.getResults().price);
+		String stock = target.queryParam("q", ctx.getWorkflowArgs()[0])
 				.request().accept(MediaType.APPLICATION_JSON_TYPE)
-				.get(StockInfoResponse.class);
-		ctx.setResponseMessage(stock.getResults().price);
+				.get(String.class);
+		ctx.setResponseMessage(stock);
 		//ctx.setOutputMessage("87.99");
 		return true;
 	}

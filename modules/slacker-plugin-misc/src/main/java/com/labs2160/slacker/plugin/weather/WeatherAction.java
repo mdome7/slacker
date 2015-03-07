@@ -1,12 +1,10 @@
 package com.labs2160.slacker.plugin.weather;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
@@ -49,7 +47,7 @@ public class WeatherAction implements Action {
 			.queryParam("env", "store%3A%2F%2Fdatatables.org%2Falltableswithkeys")
 			.request().get(String.class);
 	
-			logger.info("Response: {}", json);
+			logger.debug("Response: {}", json);
 			ObjectMapper mapper = new ObjectMapper();
 			YahooResponse<WeatherResults> response = mapper.readValue(json, new TypeReference<YahooResponse<WeatherResults>>() {});
 	
