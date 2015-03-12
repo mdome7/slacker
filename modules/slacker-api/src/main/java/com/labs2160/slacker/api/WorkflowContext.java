@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class WorkflowContext {
 	
-	private String workflowKey;
+	private String [] workflowKey;
 
 	private String [] workflowArgs;
 	
@@ -18,15 +18,16 @@ public class WorkflowContext {
 
 	private Map<String,Object> values;
 	
-	public WorkflowContext(String key, String ... requestArgs) {
-		if (key == null || key.length() == 0) {
-			throw new IllegalArgumentException("Workflow key is required.");
+	public WorkflowContext(String [] key, String [] requestArgs) {
+		if (key == null || key.length == 0) {
+			throw new IllegalArgumentException("Workflow path is required.");
 		}
+		
 		this.workflowArgs = requestArgs == null ? new String[0] : requestArgs;
 		this.values = new ConcurrentHashMap<>();
 	}
 	
-	public String getWorkflowKey() {
+	public String [] getWorkflowKey() {
 		return workflowKey;
 	}
 

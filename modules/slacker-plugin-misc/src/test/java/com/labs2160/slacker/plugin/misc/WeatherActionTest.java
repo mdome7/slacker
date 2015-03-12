@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labs2160.slacker.api.WorkflowContext;
-import com.labs2160.slacker.api.WorkflowException;
+import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.plugin.misc.yahoo.YahooResponse;
 import com.labs2160.slacker.plugin.weather.WeatherAction;
 import com.labs2160.slacker.plugin.weather.WeatherResults;
@@ -60,14 +60,14 @@ public class WeatherActionTest {
 	public void testExecute() {
 		try {
 			logger.info(getWeather("11554"));
-		} catch (WorkflowException e) {
+		} catch (SlackerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private String getWeather(String text) throws WorkflowException {
-		WorkflowContext ctx = new WorkflowContext("Weather", text);
+	private String getWeather(String text) throws SlackerException {
+		WorkflowContext ctx = new WorkflowContext(new String [] {"weather"}, new String [] {text});
 		Assert.assertTrue(action.execute(ctx));
 		return ctx.getResponseMessage();
 	}

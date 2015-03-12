@@ -5,7 +5,7 @@ package com.labs2160.slacker.core.engine;
  */
 public class WorkflowMetadata {
 
-	private String key;
+	private String [] path;
 	
 	private String name;
 	
@@ -13,19 +13,19 @@ public class WorkflowMetadata {
 	
 	private String exampleArgs;
 	
-	public WorkflowMetadata(String key, String name, String description, String exampleArgs) {
-		this.key = key;
+	public WorkflowMetadata(String [] path, String name, String description, String exampleArgs) {
+		this.path = path;
 		this.name = name;
 		this.description = description;
 		this.exampleArgs = exampleArgs;
 	}
 
-	public String getKey() {
-		return key;
+	public String [] getPath() {
+		return path;
 	}
 
-	public void setKey(String key) {
-		this.key = key;
+	public void setPath(String [] path) {
+		this.path = path;
 	}
 
 	public String getName() {

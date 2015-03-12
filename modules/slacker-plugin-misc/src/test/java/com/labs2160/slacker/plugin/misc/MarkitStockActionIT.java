@@ -7,9 +7,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.WorkflowContext;
-import com.labs2160.slacker.api.WorkflowException;
-import com.labs2160.slacker.plugin.misc.MarkitStockAction;
 
 public class MarkitStockActionIT {
 	
@@ -26,7 +25,7 @@ public class MarkitStockActionIT {
 	public void testExecute() {
 		try {
 			logger.info(getStock("aapl"));
-		} catch (WorkflowException e) {
+		} catch (SlackerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -36,14 +35,14 @@ public class MarkitStockActionIT {
 	public void testExecuteInvalid() {
 		try {
 			logger.info(getStock("michael"));
-		} catch (WorkflowException e) {
+		} catch (SlackerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private String getStock(String symbol) throws WorkflowException {
-		WorkflowContext ctx = new WorkflowContext("stock", symbol);
+	private String getStock(String symbol) throws SlackerException {
+		WorkflowContext ctx = new WorkflowContext(new String [] {"stock"}, new String [] {symbol});
 		Assert.assertTrue(action.execute(ctx));
 		return ctx.getResponseMessage();
 	}

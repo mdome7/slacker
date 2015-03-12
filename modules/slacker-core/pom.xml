@@ -18,16 +18,16 @@
 			<artifactId>slacker-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>slacker-plugin-misc</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>slacker-plugin-hipchat</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>slacker-plugin-misc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>slacker-plugin-hipchat</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -51,6 +51,10 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
 			<!-- for Apache commons base64 encoder -->

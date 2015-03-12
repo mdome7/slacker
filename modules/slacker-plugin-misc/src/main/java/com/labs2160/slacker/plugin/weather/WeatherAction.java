@@ -13,8 +13,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labs2160.slacker.api.Action;
+import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.WorkflowContext;
-import com.labs2160.slacker.api.WorkflowException;
+import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.plugin.misc.yahoo.YahooResponse;
 
 /**
@@ -33,10 +34,10 @@ public class WeatherAction implements Action {
 	}
 	
 	@Override
-	public boolean execute(WorkflowContext ctx) throws WorkflowException {
+	public boolean execute(WorkflowContext ctx) throws SlackerException {
 		try {
 			if (ctx.getWorkflowArgs() == null || ctx.getWorkflowArgs().length == 0) {
-				throw new WorkflowException("Argument is required");
+				throw new NoArgumentsFoundException("Location info argument is required");
 			}
 			final String input = ctx.getWorkflowArgs()[0].replaceAll("[\"|,]", "");
 			String yql = String.format("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"%s\")",
@@ -54,10 +55,10 @@ public class WeatherAction implements Action {
 			WeatherResults results = response.getResults();
 			ctx.setResponseMessage(results != null ? results.toString() : "Sorry, cannot retrieve weather for: " + input );
 		
-		return true;
+			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Error while trying to retrieve weather for: {}", ctx.getWorkflowArgs(), e);
+			//throw new SlackerException("Error while retrieving weather info", e);
 		}
 		return false;
 	}

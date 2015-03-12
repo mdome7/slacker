@@ -11,8 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.labs2160.slacker.api.Action;
+import com.labs2160.slacker.api.NoArgumentsFoundException;
+import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.WorkflowContext;
-import com.labs2160.slacker.api.WorkflowException;
 
 /**
  * Google returns html:
@@ -84,9 +85,9 @@ public class GoogleStockAction implements Action {
 	}
 
 	@Override
-	public boolean execute(WorkflowContext ctx) throws WorkflowException {
+	public boolean execute(WorkflowContext ctx) throws SlackerException {
 		if (ctx.getWorkflowArgs() == null || ctx.getWorkflowArgs().length == 0) {
-			throw new WorkflowException("Stock symbol argument is required");
+			throw new NoArgumentsFoundException("Stock symbol argument is required");
 		}
 //		StockInfoResponse stock = target.queryParam("q", ctx.getWorkflowArgs()[0])
 //				.request().accept(MediaType.APPLICATION_JSON_TYPE)

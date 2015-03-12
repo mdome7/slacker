@@ -54,19 +54,23 @@ public class WorkflowEngineProvider {
 		PrintToConsoleEndpoint p2c = new PrintToConsoleEndpoint();
 		
 		Workflow wf1 = new Workflow("Echo", "Spits back what you tell it");
+		wf1.setDescription("Echoes messages back");
 		wf1.addAction(new EchoAction());
 		wf1.addEndpoint(p2c);
-		engine.addWorkflow("echo", wf1);
+		engine.addWorkflow(wf1, "echo");
 
 		Workflow wf2 = new Workflow("Stock Price", "Gets the current stock price for the specified symbol");
+		wf2.setDescription("Retrieves stock price for the given symbol");
 		wf2.addAction(new MarkitStockAction());
 		wf2.addEndpoint(p2c);
-		engine.addWorkflow("stock", wf2);
+		engine.addWorkflow(wf2, "stock");
+		engine.addWorkflow(wf2, "stock", "price");
 
 		Workflow wf3 = new Workflow("Weather", "Gets the current weather for the specified location");
+		wf3.setDescription("Returns the current weather forecast for the given location");
 		wf3.addAction(new WeatherAction());
 		wf3.addEndpoint(p2c);
-		engine.addWorkflow("weather", wf3);
+		engine.addWorkflow(wf3, "weather");
 	}
 	
 }

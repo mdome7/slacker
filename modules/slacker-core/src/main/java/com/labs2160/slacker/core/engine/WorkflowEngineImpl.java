@@ -1,6 +1,9 @@
 package com.labs2160.slacker.core.engine;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -8,19 +11,23 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.InvalidRequestException;
+import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.Request;
 import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.ScheduledJob;
+import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.WorkflowContext;
-import com.labs2160.slacker.api.WorkflowException;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
+	
+	private final static String HELP_KEY = "help";
 	
 	private final static Logger logger = LoggerFactory.getLogger(WorkflowEngineImpl.class);
 	
@@ -30,33 +37,38 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 	private ScheduledExecutorService scheduler;
 	
 	/** in-memory registry of all workflows */
-	private Map<String,Workflow> workflows = new ConcurrentHashMap<>();
+	private final WorkflowRegistry registry;
 
 	/** in-memory registry of all collectors */
-	private Map<String,RequestCollector> collectors = new ConcurrentHashMap<>();
+	private final Map<String,RequestCollector> collectors;
 	
 	private class WorkflowRequest {
-		private String key;
+		private String [] path;
 		private String [] args;
 		private Workflow workflow;
 
-		public WorkflowRequest(String key, String [] args, Workflow wf) {
-			this.key = key;
+		public WorkflowRequest(String [] path, String [] args, Workflow wf) {
+			this.path = path;
 			this.args = args;
 			this.workflow = wf;
 		}
 		
-		public String getKey() {
-			return key;
+		public String [] getPath() {
+			return path;
 		}
 
-		public String[] getArgs() {
+		public String [] getArgs() {
 			return args;
 		}
 
 		public Workflow getWorkflow() {
 			return workflow;
 		}
+	}
+	
+	public WorkflowEngineImpl() {
+		registry = new WorkflowRegistry();
+		collectors = new ConcurrentHashMap<>();
 	}
 
 	@Override
@@ -99,64 +111,86 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 		}
 	}
 	
-	public void addCollector(String key, RequestCollector collector) {
-		collectors.put(key, collector);
-		logger.info("Collector \"{}\" added", key);
+	public void addCollector(String path, RequestCollector collector) {
+		collectors.put(path, collector);
+		logger.info("Collector \"{}\" added", path);
 	}
 	
-	public void addWorkflow(String key, Workflow wf) {
-		workflows.put(key, wf);
-		logger.info("Workflow \"{}\" added", key);
+	public void addWorkflow(Workflow wf, String ... path) {
+		registry.addWorkflow(wf, path);
+		logger.info("Added workflow: {} - {}", path, wf.getName());
 	}
 
 	@Override
-	public WorkflowContext handle(Request request) throws InvalidRequestException, WorkflowException {
-		WorkflowRequest wfr = parseWorkflowRequest(request.getArgs());
-		logger.debug("Request submitted: key={}, wf={}, args={}", wfr.getKey(), wfr.getWorkflow(), wfr.getArgs());
-		Workflow wf = wfr.getWorkflow();
-		if (wf == null) {
-			throw new InvalidRequestException("Cannot find workflow for key: " + wfr.getKey());
-		}
-		
-		WorkflowContext ctx = new WorkflowContext(wfr.getKey(), wfr.getArgs());
-		for (Action action : wf.getActions()) {
-			if (! action.execute(ctx)) {
-				logger.error("Error enountered executing action: {}", action.getClass().getName());
+	public WorkflowContext handle(Request request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException {
+		WorkflowContext ctx = handleHelp(request);
+		if (ctx != null) {
+			return ctx;
+		} else {
+			WorkflowRequest wfr = parseWorkflowRequest(request.getArgs());
+			logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
+			Workflow wf = wfr.getWorkflow();
+			if (wf == null) {
+				throw new InvalidRequestException("Cannot find workflow for args: " + StringUtils.join(wfr.getPath(), " "));
 			}
-		}
-
-		for (Endpoint endpoint : wf.getEndpoints()) {
-			if (! endpoint.execute(ctx)) {
-				logger.error("Error enountered executing endpoint: {}", endpoint.getClass().getName());
+			
+			ctx = new WorkflowContext(wfr.getPath(), wfr.getArgs());
+			for (Action action : wf.getActions()) {
+				if (! action.execute(ctx)) {
+					logger.error("Error enountered executing action: {}", action.getClass().getName());
+				}
 			}
+	
+			for (Endpoint endpoint : wf.getEndpoints()) {
+				if (! endpoint.execute(ctx)) {
+					logger.error("Error enountered executing endpoint: {}", endpoint.getClass().getName());
+				}
+			}
+			return ctx;
 		}
-		return ctx;
 	}
-
-	@Override
-	public WorkflowMetadata [] getWorkflowMetadata() {
-		WorkflowMetadata [] metadata = new WorkflowMetadata[workflows.size()];
-		int i = 0;
-		for (String key : workflows.keySet()) {
-			Workflow wf = workflows.get(key);
-			metadata[i++] = new WorkflowMetadata(key, wf.getName(), wf.getDescription(), wf.getExampleArgs());
-		}
-		// TODO Auto-generated method stub
-		return metadata;
+	
+	public WorkflowRegistry getRegistry() {
+		return null;
 	}
 	
 	private WorkflowRequest parseWorkflowRequest(String [] origArgs) throws InvalidRequestException {
 		// For now, workflows are stored in a stupid hash so just greedily
 		// find a matching workflow by concatenating args to form
-		// possible keys.
-		Workflow wf = null;
-		String key = origArgs[0];
-		String [] args = origArgs.length > 1 ? Arrays.copyOfRange(origArgs, 1, origArgs.length) : null;
-		wf = workflows.get(key);
-		if (wf == null) {
-			throw new InvalidRequestException("Cannot find workflow for key " + key);
+		// possible paths.
+		final RegistryNode match = registry.findWorkflowMatch(origArgs);
+		if (match == null) {
+			throw new InvalidRequestException("Cannot find workflow for args: " + origArgs);
 		}
-		
-		return new WorkflowRequest(key, args, wf);
+
+		String [] path = match.getPath();
+		String [] args = origArgs.length > path.length ? Arrays.copyOfRange(origArgs, path.length, origArgs.length) : null;
+
+		return new WorkflowRequest(path, args, match.getWorkflow());
+	}
+	
+	private WorkflowContext handleHelp(Request request) {
+		if (request.getArgs()[0].equals(HELP_KEY)) {
+			List<WorkflowMetadata> metadata = registry.getWorkflowMetadata();
+			Collections.sort(metadata, new Comparator<WorkflowMetadata>() {
+				@Override
+				public int compare(WorkflowMetadata m1, WorkflowMetadata m2) {
+					String p1 = StringUtils.join(m1.getPath(), "::");
+					String p2 = StringUtils.join(m2.getPath(), "::");
+					return p1.compareTo(p2);
+				}
+			});
+			WorkflowContext ctx = new WorkflowContext(new String[]{HELP_KEY}, null);
+			StringBuilder sb = new StringBuilder();
+			for (WorkflowMetadata wm : metadata) {
+				sb.append(StringUtils.join(wm.getPath(), " "));
+				sb.append(" - ");
+				sb.append(wm.getDescription());
+				sb.append("\n");
+			}
+			ctx.setResponseMessage(sb.toString());
+			return ctx;
+		}
+		return null;
 	}
 }

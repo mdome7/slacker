@@ -1,8 +1,6 @@
 package com.labs2160.slacker.plugin.hipchat;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
@@ -19,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.InvalidRequestException;
+import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.Request;
 import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.RequestHandler;
@@ -126,12 +125,15 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 				WorkflowContext ctx = handler.handle(new Request("hipchat", parsedBody));
 				chat.sendMessage(ctx.getResponseMessage());
 			}
+		} catch (NoArgumentsFoundException e) {
+			logger.warn("Missing arguments {}, request={} ({})", chat.getParticipant(), msg.getBody(), e.getMessage());
+			sendMessage(chat, Emoticon.RUKM + " You need supply arguments");
 		} catch (InvalidRequestException e) {
-			logger.warn("Could not process request from {}, request={}", chat.getParticipant(), msg.getBody());
-			sendMessage(chat, "Sorry buddy.  I'm not able to help you out right now.");
+			logger.warn("Invalid request from {}, request={} ({})", chat.getParticipant(), msg.getBody(), e.getMessage());
+			sendMessage(chat, Emoticon.SHRUG + " I could understand your gibberish");
 		} catch (SlackerException | NotConnectedException e) {
 			logger.error("Error while trying to handle HipChat message from {}", chat.getParticipant(), e);
-			sendMessage(chat, "Sorry buddy.  I'm not able to help you out right now.");
+			sendMessage(chat, Emoticon.DOH + " I'm not able to help you out right now.");
 		}
 	}
 
