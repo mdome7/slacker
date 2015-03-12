@@ -8,7 +8,7 @@ public class EchoAction implements Action {
 
 	@Override
 	public boolean execute(WorkflowContext ctx) throws SlackerException {
-		String [] args = ctx.getWorkflowArgs();
+		String [] args = ctx.getRequestArgs();
 		if (args.length == 0) {
 			ctx.setResponseMessage("... echo!!");
 		} else {

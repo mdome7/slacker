@@ -36,10 +36,10 @@ public class WeatherAction implements Action {
 	@Override
 	public boolean execute(WorkflowContext ctx) throws SlackerException {
 		try {
-			if (ctx.getWorkflowArgs() == null || ctx.getWorkflowArgs().length == 0) {
+			if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
 				throw new NoArgumentsFoundException("Location info argument is required");
 			}
-			final String input = ctx.getWorkflowArgs()[0].replaceAll("[\"|,]", "");
+			final String input = ctx.getRequestArgs()[0].replaceAll("[\"|,]", "");
 			String yql = String.format("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"%s\")",
 					input);
 			logger.debug(yql);
@@ -57,7 +57,7 @@ public class WeatherAction implements Action {
 		
 			return true;
 		} catch (IOException e) {
-			logger.warn("Error while trying to retrieve weather for: {}", ctx.getWorkflowArgs(), e);
+			logger.warn("Error while trying to retrieve weather for: {}", ctx.getRequestArgs(), e);
 			//throw new SlackerException("Error while retrieving weather info", e);
 		}
 		return false;

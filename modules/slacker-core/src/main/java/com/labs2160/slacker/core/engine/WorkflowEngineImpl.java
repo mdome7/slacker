@@ -127,7 +127,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 		if (ctx != null) {
 			return ctx;
 		} else {
-			WorkflowRequest wfr = parseWorkflowRequest(request.getArgs());
+			WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
 			logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
 			Workflow wf = wfr.getWorkflow();
 			if (wf == null) {
@@ -170,7 +170,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 	}
 	
 	private WorkflowContext handleHelp(Request request) {
-		if (request.getArgs()[0].equals(HELP_KEY)) {
+		if (request.getRawArguments()[0].equals(HELP_KEY)) {
 			List<WorkflowMetadata> metadata = registry.getWorkflowMetadata();
 			Collections.sort(metadata, new Comparator<WorkflowMetadata>() {
 				@Override

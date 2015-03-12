@@ -45,10 +45,10 @@ public class MarkitStockAction implements Action {
 
 	@Override
 	public boolean execute(WorkflowContext ctx) throws SlackerException {
-		if (ctx.getWorkflowArgs() == null || ctx.getWorkflowArgs().length == 0) {
+		if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
 			throw new NoArgumentsFoundException("Stock symbol argument is required");
 		}
-		final String stockSymbol = ctx.getWorkflowArgs()[0].replaceAll("\"","");
+		final String stockSymbol = ctx.getRequestArgs()[0].replaceAll("\"","");
 		MarkitStockInfo stock = target.queryParam("symbol", stockSymbol)
 				.request().accept(MediaType.APPLICATION_JSON_TYPE)
 				.get(MarkitStockInfo.class);

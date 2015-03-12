@@ -9,18 +9,18 @@ public class Request {
 
 	private String source;
 	
-	private String [] args;
+	private String [] rawArguments;
 
 	public Request(String source, String ... args) {
 		this.source = source;
-		this.args = args;
+		this.rawArguments = args;
 	}
 
 	public String getSource() {
 		return source;
 	}
 
-	public String[] getArgs() {
-		return args;
+	public String[] getRawArguments() {
+		return rawArguments;
 	}
 }

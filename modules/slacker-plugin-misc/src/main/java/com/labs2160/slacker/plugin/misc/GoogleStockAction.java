@@ -86,14 +86,14 @@ public class GoogleStockAction implements Action {
 
 	@Override
 	public boolean execute(WorkflowContext ctx) throws SlackerException {
-		if (ctx.getWorkflowArgs() == null || ctx.getWorkflowArgs().length == 0) {
+		if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
 			throw new NoArgumentsFoundException("Stock symbol argument is required");
 		}
 //		StockInfoResponse stock = target.queryParam("q", ctx.getWorkflowArgs()[0])
 //				.request().accept(MediaType.APPLICATION_JSON_TYPE)
 //				.get(StockInfoResponse.class);
 //		ctx.setResponseMessage(stock.getResults().price);
-		String stock = target.queryParam("q", ctx.getWorkflowArgs()[0])
+		String stock = target.queryParam("q", ctx.getRequestArgs()[0])
 				.request().accept(MediaType.APPLICATION_JSON_TYPE)
 				.get(String.class);
 		ctx.setResponseMessage(stock);
