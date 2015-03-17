@@ -1,7 +1,6 @@
 package com.labs2160.slacker.core;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -17,8 +16,9 @@ import com.labs2160.slacker.core.engine.WorkflowEngine;
 import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
 import com.labs2160.slacker.plugin.hipchat.HipChatCollector;
 import com.labs2160.slacker.plugin.misc.EchoAction;
-import com.labs2160.slacker.plugin.misc.PrintToConsoleEndpoint;
 import com.labs2160.slacker.plugin.misc.MarkitStockAction;
+import com.labs2160.slacker.plugin.misc.PrintToConsoleEndpoint;
+import com.labs2160.slacker.plugin.misc.RandomPickerAction;
 import com.labs2160.slacker.plugin.weather.WeatherAction;
 
 /**
@@ -53,24 +53,33 @@ public class WorkflowEngineProvider {
 	private void initializeWorkflows(WorkflowEngineImpl engine, Properties config) {
 		PrintToConsoleEndpoint p2c = new PrintToConsoleEndpoint();
 		
-		Workflow wf1 = new Workflow("Echo", "Spits back what you tell it");
-		wf1.setDescription("Echoes messages back");
-		wf1.addAction(new EchoAction());
-		wf1.addEndpoint(p2c);
-		engine.addWorkflow(wf1, "echo");
+		Workflow wfEcho = new Workflow("Echo", "Echoes messages back");
+		wfEcho.setArgsSpecification("<any string>");
+		wfEcho.setDescription("Echoes messages back");
+		wfEcho.addAction(new EchoAction());
+		wfEcho.addEndpoint(p2c);
+		engine.addWorkflow(wfEcho, "echo");
 
-		Workflow wf2 = new Workflow("Stock Price", "Gets the current stock price for the specified symbol");
-		wf2.setDescription("Retrieves stock price for the given symbol");
-		wf2.addAction(new MarkitStockAction());
-		wf2.addEndpoint(p2c);
-		engine.addWorkflow(wf2, "stock");
-		engine.addWorkflow(wf2, "stock", "price");
+		Workflow wfStock = new Workflow("Stock Price", "Retrieves stock price for the given symbol");
+		wfStock.setArgsSpecification("<stock symbol>");
+		wfStock.addAction(new MarkitStockAction());
+		wfStock.addEndpoint(p2c);
+		engine.addWorkflow(wfStock, "stock");
+		engine.addWorkflow(wfStock, "stock", "price");
 
-		Workflow wf3 = new Workflow("Weather", "Gets the current weather for the specified location");
-		wf3.setDescription("Returns the current weather forecast for the given location");
-		wf3.addAction(new WeatherAction());
-		wf3.addEndpoint(p2c);
-		engine.addWorkflow(wf3, "weather");
+		Workflow wfWeather = new Workflow("Weather", "Gets the current weather for the specified location");
+		wfWeather.setArgsSpecification("<location or zip code>");
+		wfWeather.setExampleArgs("\"Seattle, WA\" or 98012");
+		wfWeather.addAction(new WeatherAction());
+		wfWeather.addEndpoint(p2c);
+		engine.addWorkflow(wfWeather, "weather");
+
+		Workflow wfRandomPicker = new Workflow("Random Picker", "Picks random values from a set");
+		wfRandomPicker.setArgsSpecification("<num to pick> <choice 1> <choice 2> ... <choice N>");
+		wfRandomPicker.setExampleArgs("2 apple banana orange");
+		wfRandomPicker.addAction(new RandomPickerAction());
+		wfRandomPicker.addEndpoint(p2c);
+		engine.addWorkflow(wfRandomPicker, "pick");
 	}
 	
 }

@@ -64,6 +64,7 @@ public class WorkflowRegistry {
 			metadata.add(new WorkflowMetadata(node.getPath(),
 					wf.getName(),
 					wf.getDescription(),
+					wf.getArgsSpecification(),
 					wf.getExampleArgs()));
 		}
 		for (RegistryNode child : node.getChildren()) {

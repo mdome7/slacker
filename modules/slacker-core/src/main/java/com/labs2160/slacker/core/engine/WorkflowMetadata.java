@@ -9,14 +9,17 @@ public class WorkflowMetadata {
 	
 	private String name;
 	
+	private String argsSpecification;
+	
 	private String description;
 	
 	private String exampleArgs;
 	
-	public WorkflowMetadata(String [] path, String name, String description, String exampleArgs) {
+	public WorkflowMetadata(String [] path, String name, String description, String argsSpecification, String exampleArgs) {
 		this.path = path;
 		this.name = name;
 		this.description = description;
+		this.argsSpecification = argsSpecification;
 		this.exampleArgs = exampleArgs;
 	}
 
@@ -24,31 +27,19 @@ public class WorkflowMetadata {
 		return path;
 	}
 
-	public void setPath(String [] path) {
-		this.path = path;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getDescription() {
 		return description;
 	}
-
-	public void setDescription(String description) {
-		this.description = description;
+	
+	public String getArgsSpecification() {
+		return argsSpecification;
 	}
 
 	public String getExampleArgs() {
 		return exampleArgs;
-	}
-
-	public void setExampleArgs(String exampleArgs) {
-		this.exampleArgs = exampleArgs;
 	}
 }

@@ -176,7 +176,7 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 		ScheduledJob keepAlive = new ScheduledJob(KEEP_ALIVE_PERIOD_SEC) {
 			@Override
 			public void run() {
-				logger.debug("Sending keepalive msg to HipChat server");
+				logger.trace("Sending keepalive msg to HipChat server");
 				sendMessage(keepAliveChat, " ");
 			}
 		};

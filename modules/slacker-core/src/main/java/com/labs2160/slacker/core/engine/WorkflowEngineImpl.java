@@ -183,10 +183,11 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			WorkflowContext ctx = new WorkflowContext(new String[]{HELP_KEY}, null);
 			StringBuilder sb = new StringBuilder();
 			for (WorkflowMetadata wm : metadata) {
-				sb.append(StringUtils.join(wm.getPath(), " "));
-				sb.append(" - ");
-				sb.append(wm.getDescription());
-				sb.append("\n");
+				sb.append(StringUtils.join(wm.getPath(), " "))
+					.append(" ")
+					.append(wm.getArgsSpecification()).append("\n")
+					.append("\t").append(wm.getName()).append(" - ").append(wm.getDescription())
+					.append("\n");
 			}
 			ctx.setResponseMessage(sb.toString());
 			return ctx;
