@@ -23,7 +23,7 @@ import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.RequestHandler;
 import com.labs2160.slacker.api.ScheduledJob;
 import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.WorkflowContext;
+import com.labs2160.slacker.api.SlackerContext;
 
 /**
  * TLS is required for all connections.
@@ -37,22 +37,22 @@ import com.labs2160.slacker.api.WorkflowContext;
  * TODO: Rename to XMPPCollector?
  */
 public class HipChatCollector implements RequestCollector, ChatManagerListener, ChatMessageListener {
-	
+
 	/** period betwen empty messages sent to HipChat server to keep connection alive */
 	private final static int KEEP_ALIVE_PERIOD_SEC = 90;
-	
+
 	private final static Logger logger = LoggerFactory.getLogger(HipChatCollector.class);
-	
+
 	private XMPPTCPConnection conn;
-	
+
 	private RequestHandler handler;
-	
+
 	/** chat used for keepalive messages */
 	private Chat keepAliveChat;
 
 	/** Jabber ID */
 	private String username;
-	
+
 	public HipChatCollector(String host, String username, String password) {
 		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder()
 				.setHost(host).setPort(5222)
@@ -76,7 +76,7 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 			throw new IllegalStateException("Cannot login to Hipchat server");
 		}
 		this.keepAliveChat = ChatManager.getInstanceFor(conn).createChat(username); // loopback chat
-		
+
 		ChatManager.getInstanceFor(conn).addChatListener(this);
 		logger.info("HipChat state: connected={}, authenticated={}", conn.isAuthenticated(), conn.isAuthenticated());
 	}
@@ -122,8 +122,8 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 			} else {
 				logger.debug("Message from {}, body={}", msg.getFrom(), msg.getBody());
 				String [] parsedBody = body.split(" ");
-				WorkflowContext ctx = handler.handle(new Request("hipchat", parsedBody));
-				chat.sendMessage(ctx.getResponseMessage());
+				SlackerContext ctx = handler.handle(new Request("hipchat", parsedBody));
+				chat.sendMessage(ctx.getResponse().getMessage());
 			}
 		} catch (NoArgumentsFoundException e) {
 			logger.warn("Missing arguments {}, request={} ({})", chat.getParticipant(), msg.getBody(), e.getMessage());
@@ -140,7 +140,7 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 	private boolean sendMessage(Chat chat, String message) {
 		return sendMessage(chat, message, 2);
 	}
-	
+
 	private boolean sendMessage(Chat chat, String message, int attempts) {
 		try {
 			chat.sendMessage(message);
@@ -153,7 +153,7 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
 			return false;
 		}
 	}
-	
+
 	private boolean connect(boolean quietly) {
 		if (! conn.isConnected()) {
 			try {

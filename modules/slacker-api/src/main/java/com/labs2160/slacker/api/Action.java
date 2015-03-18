@@ -8,5 +8,5 @@ public interface Action {
 	 * @return true if the workflow should continue normally, false if error (check ctx.getException())
 	 * @throws SlackerException
 	 */
-	boolean execute(WorkflowContext ctx) throws SlackerException;
+	boolean execute(SlackerContext ctx) throws SlackerException;
 }

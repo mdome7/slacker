@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.WorkflowContext;
+import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.plugin.misc.yahoo.YahooResponse;
 
@@ -34,7 +34,7 @@ public class WeatherAction implements Action {
 	}
 	
 	@Override
-	public boolean execute(WorkflowContext ctx) throws SlackerException {
+	public boolean execute(SlackerContext ctx) throws SlackerException {
 		try {
 			if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
 				throw new NoArgumentsFoundException("Location info argument is required");

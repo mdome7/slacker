@@ -2,12 +2,12 @@ package com.labs2160.slacker.plugin.misc;
 
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.WorkflowContext;
+import com.labs2160.slacker.api.SlackerContext;
 
 public class MathAction implements Action {
 
 	@Override
-	public boolean execute(WorkflowContext ctx) throws SlackerException {
+	public boolean execute(SlackerContext ctx) throws SlackerException {
 		// TODO Auto-generated method stub
 		return false;
 	}

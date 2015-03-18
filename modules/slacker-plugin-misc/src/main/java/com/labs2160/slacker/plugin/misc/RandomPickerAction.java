@@ -10,7 +10,7 @@ import jersey.repackaged.com.google.common.collect.Lists;
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.WorkflowContext;
+import com.labs2160.slacker.api.SlackerContext;
 
 public class RandomPickerAction implements Action {
 	
@@ -18,7 +18,7 @@ public class RandomPickerAction implements Action {
 	private static final SecureRandom RANDOM = new SecureRandom(Long.toString(System.currentTimeMillis()).getBytes());
 
 	@Override
-	public boolean execute(WorkflowContext ctx) throws SlackerException {
+	public boolean execute(SlackerContext ctx) throws SlackerException {
 		String [] args = ctx.getRequestArgs();
 		try {
 			if (args.length < 3) {

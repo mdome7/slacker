@@ -7,21 +7,20 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.plugin.misc.YahooStockAction;
+import com.labs2160.slacker.api.SlackerContext;
 
 public class YahooStockActionIT {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(YahooStockActionIT.class);
 
 	private YahooStockAction action;
-	
+
 	@Before
 	public void before() {
 		action = new YahooStockAction();
 	}
-	
+
 	@Test
 	public void testExecute() {
 		try {
@@ -31,10 +30,10 @@ public class YahooStockActionIT {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private String getStock(String symbol) throws SlackerException {
-		WorkflowContext ctx = new WorkflowContext(new String [] {"stock"}, new String [] {symbol});
+		SlackerContext ctx = new SlackerContext(new String [] {"stock"}, new String [] {symbol});
 		Assert.assertTrue(action.execute(ctx));
-		return ctx.getResponseMessage();
+		return ctx.getResponse().getMessage();
 	}
 }

@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.labs2160.slacker.api.WorkflowContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.plugin.misc.yahoo.YahooResponse;
 import com.labs2160.slacker.plugin.weather.WeatherAction;
 import com.labs2160.slacker.plugin.weather.WeatherResults;
@@ -27,7 +27,7 @@ public class WeatherActionTest {
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	private WeatherAction action;
-	
+
 	@Before
 	public void before() {
 		action = new WeatherAction();
@@ -39,11 +39,11 @@ public class WeatherActionTest {
 		map.put("a", "1");
 		WeatherResults results = new WeatherResults();
 		//results.setChannel(map);
-		
+
 		String json = mapper.writeValueAsString(results);
 		logger.info("Serialized:\n{}", json);
 	}
-	
+
 	@Test
 	public void testJsonDeserialization() throws IOException {
 		URL resource = getClass().getClassLoader().getResource("weatherResponse.json");
@@ -55,7 +55,7 @@ public class WeatherActionTest {
 			logger.info("\t{}: {} to {} - {}", fc.date, fc.low, fc.high, fc.text);
 		}
 	}
-	
+
 	@Test
 	public void testExecute() {
 		try {
@@ -65,10 +65,10 @@ public class WeatherActionTest {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private String getWeather(String text) throws SlackerException {
-		WorkflowContext ctx = new WorkflowContext(new String [] {"weather"}, new String [] {text});
+		SlackerContext ctx = new SlackerContext(new String [] {"weather"}, new String [] {text});
 		Assert.assertTrue(action.execute(ctx));
-		return ctx.getResponseMessage();
+		return ctx.getResponse().getMessage();
 	}
 }

@@ -1,5 +1,6 @@
 package com.labs2160.slacker.core.engine;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,27 +22,28 @@ import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.Request;
 import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.api.Response;
 import com.labs2160.slacker.api.ScheduledJob;
 import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.WorkflowContext;
+import com.labs2160.slacker.api.SlackerContext;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
-	
+
 	private final static String HELP_KEY = "help";
-	
+
 	private final static Logger logger = LoggerFactory.getLogger(WorkflowEngineImpl.class);
-	
+
 	private final static long INITIAL_SCHEDULE_DELAY_SEC = 10;
 
 	/** scheduler for jobs */
 	private ScheduledExecutorService scheduler;
-	
+
 	/** in-memory registry of all workflows */
 	private final WorkflowRegistry registry;
 
 	/** in-memory registry of all collectors */
 	private final Map<String,RequestCollector> collectors;
-	
+
 	private class WorkflowRequest {
 		private String [] path;
 		private String [] args;
@@ -52,7 +54,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			this.args = args;
 			this.workflow = wf;
 		}
-		
+
 		public String [] getPath() {
 			return path;
 		}
@@ -65,7 +67,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			return workflow;
 		}
 	}
-	
+
 	public WorkflowEngineImpl() {
 		registry = new WorkflowRegistry();
 		collectors = new ConcurrentHashMap<>();
@@ -77,13 +79,13 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 		logger.debug("Starting engine...");
 
 		scheduler = Executors.newScheduledThreadPool(1);
-		
+
 		for (String collectorName : collectors.keySet()) {
 			try {
 				logger.debug("Starting collector: {}", collectorName);
 				RequestCollector collector = collectors.get(collectorName);
 				collector.start(this);
-				
+
 				ScheduledJob [] jobs = collector.getScheduledJobs();
 				if (jobs != null) {
 					for (ScheduledJob job : jobs) {
@@ -93,7 +95,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 						// TODO: keep track of jobFutures per collector if we want collectors to be shutdown at runtime
 					}
 				}
-				
+
 			} catch (Exception e) {
 				logger.error("Could not start collector {} due to error.", collectorName, e);
 				logger.warn("Skipping collector {} but will continue startup.", collectorName);
@@ -110,20 +112,20 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			collector.shutdown();
 		}
 	}
-	
+
 	public void addCollector(String path, RequestCollector collector) {
 		collectors.put(path, collector);
 		logger.info("Collector \"{}\" added", path);
 	}
-	
+
 	public void addWorkflow(Workflow wf, String ... path) {
 		registry.addWorkflow(wf, path);
 		logger.info("Added workflow: {} - {}", path, wf.getName());
 	}
 
 	@Override
-	public WorkflowContext handle(Request request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException {
-		WorkflowContext ctx = handleHelp(request);
+	public SlackerContext handle(Request request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException {
+		SlackerContext ctx = handleHelp(request);
 		if (ctx != null) {
 			return ctx;
 		} else {
@@ -133,34 +135,36 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			if (wf == null) {
 				throw new InvalidRequestException("Cannot find workflow for args: " + StringUtils.join(wfr.getPath(), " "));
 			}
-			
-			ctx = new WorkflowContext(wfr.getPath(), wfr.getArgs());
+
+			ctx = new SlackerContext(wfr.getPath(), wfr.getArgs());
 			for (Action action : wf.getActions()) {
 				if (! action.execute(ctx)) {
 					logger.error("Error enountered executing action: {}", action.getClass().getName());
 				}
 			}
-	
+
+			Response response = convertToImmutableResponse(ctx.getResponse());
 			for (Endpoint endpoint : wf.getEndpoints()) {
-				if (! endpoint.execute(ctx)) {
+				if (! endpoint.deliverResponse(response)) {
 					logger.error("Error enountered executing endpoint: {}", endpoint.getClass().getName());
 				}
 			}
 			return ctx;
 		}
 	}
-	
+
+	@Override
 	public WorkflowRegistry getRegistry() {
 		return null;
 	}
-	
+
 	private WorkflowRequest parseWorkflowRequest(String [] origArgs) throws InvalidRequestException {
 		// For now, workflows are stored in a stupid hash so just greedily
 		// find a matching workflow by concatenating args to form
 		// possible paths.
 		final RegistryNode match = registry.findWorkflowMatch(origArgs);
 		if (match == null) {
-			throw new InvalidRequestException("Cannot find workflow for args: " + origArgs);
+			throw new InvalidRequestException("Cannot find workflow for args: " + StringUtils.join(origArgs, " "));
 		}
 
 		String [] path = match.getPath();
@@ -168,8 +172,8 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
 		return new WorkflowRequest(path, args, match.getWorkflow());
 	}
-	
-	private WorkflowContext handleHelp(Request request) {
+
+	private SlackerContext handleHelp(Request request) {
 		if (request.getRawArguments()[0].equals(HELP_KEY)) {
 			List<WorkflowMetadata> metadata = registry.getWorkflowMetadata();
 			Collections.sort(metadata, new Comparator<WorkflowMetadata>() {
@@ -180,7 +184,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 					return p1.compareTo(p2);
 				}
 			});
-			WorkflowContext ctx = new WorkflowContext(new String[]{HELP_KEY}, null);
+			SlackerContext ctx = new SlackerContext(new String[]{HELP_KEY}, null);
 			StringBuilder sb = new StringBuilder();
 			for (WorkflowMetadata wm : metadata) {
 				sb.append(StringUtils.join(wm.getPath(), " "))
@@ -193,5 +197,25 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			return ctx;
 		}
 		return null;
+	}
+
+	private Response convertToImmutableResponse(Response res) {
+		return new Response(res.getMessage(), res.getAttachedMedia(), res.getAttachedMediaType()) {
+
+			@Override
+			public void setMessage(String message) {
+				throw new UnsupportedOperationException("Cannot set message on this response object");
+			}
+
+			@Override
+			public void setAttachedMedia(InputStream attachedMedia) {
+				throw new UnsupportedOperationException("Cannot set message on this response object");
+			}
+
+			@Override
+			public void setAttachedMediaType(String attachedMediaType) {
+				throw new UnsupportedOperationException("Cannot set message on this response object");
+			}
+		};
 	}
 }

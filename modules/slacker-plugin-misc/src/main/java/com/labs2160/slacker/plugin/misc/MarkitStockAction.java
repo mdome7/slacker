@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.WorkflowContext;
+import com.labs2160.slacker.api.SlackerContext;
 
 /**
  * {
@@ -44,7 +44,7 @@ public class MarkitStockAction implements Action {
 	}
 
 	@Override
-	public boolean execute(WorkflowContext ctx) throws SlackerException {
+	public boolean execute(SlackerContext ctx) throws SlackerException {
 		if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
 			throw new NoArgumentsFoundException("Stock symbol argument is required");
 		}
