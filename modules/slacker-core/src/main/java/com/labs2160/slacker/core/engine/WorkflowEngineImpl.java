@@ -24,8 +24,8 @@ import com.labs2160.slacker.api.Request;
 import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.Response;
 import com.labs2160.slacker.api.ScheduledJob;
-import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.SlackerContext;
+import com.labs2160.slacker.api.SlackerException;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
 
@@ -185,12 +185,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 				}
 			});
 			SlackerContext ctx = new SlackerContext(new String[]{HELP_KEY}, null);
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder("I can understand:\n");
 			for (WorkflowMetadata wm : metadata) {
 				sb.append(StringUtils.join(wm.getPath(), " "))
 					.append(" ")
 					.append(wm.getArgsSpecification()).append("\n")
-					.append("\t").append(wm.getName()).append(" - ").append(wm.getDescription())
+					.append("    ").append(wm.getName()).append(" - ").append(wm.getDescription())
 					.append("\n");
 			}
 			ctx.setResponseMessage(sb.toString());
