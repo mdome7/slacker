@@ -113,9 +113,9 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 		}
 	}
 
-	public void addCollector(String path, RequestCollector collector) {
-		collectors.put(path, collector);
-		logger.info("Collector \"{}\" added", path);
+	public void addCollector(String name, RequestCollector collector) {
+		collectors.put(name, collector);
+		logger.info("Collector \"{}\" added", name);
 	}
 
 	public void addWorkflow(Workflow wf, String ... path) {

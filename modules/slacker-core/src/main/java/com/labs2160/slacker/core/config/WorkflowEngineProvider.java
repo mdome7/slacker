@@ -21,9 +21,7 @@ import com.labs2160.slacker.plugin.misc.RandomPickerAction;
 import com.labs2160.slacker.plugin.weather.WeatherAction;
 
 /**
- * TODO: convert into a CDI "provider"
- * @author mike
- *
+ * TODO: Convert to read off a config file and decouple libraries.
  */
 @ApplicationScoped
 public class WorkflowEngineProvider {
@@ -34,7 +32,6 @@ public class WorkflowEngineProvider {
 
     @Produces @ApplicationScoped @Named("engine")
     public WorkflowEngine provide() throws IOException {
-        // TODO: inject config and explore other Configuration classes, format (YML)
         final long start = System.currentTimeMillis();
         WorkflowEngineImpl engine = new WorkflowEngineImpl();
         initializeCollectors(engine, config);
@@ -44,9 +41,17 @@ public class WorkflowEngineProvider {
     }
 
     private void initializeCollectors(WorkflowEngineImpl engine, SlackerConfig config) {
-        HipChatCollector hcListener = new HipChatCollector(config.getProperty("xmpp.host"),
-                config.getProperty("xmpp.user"), config.getProperty("xmpp.password"));
-        engine.addCollector("HipChat", hcListener);
+        HipChatCollector hipchat = new HipChatCollector(config.getProperty("xmpp.host"),
+                config.getProperty("xmpp.user"), config.getProperty("xmpp.password"),
+                config.getProperty("xmpp.muc.nickname"), config.getProperty("xmpp.muc.domain"),
+                config.getProperty("xmpp.muc.keyword"));
+        String rooms = config.getProperty("xmpp.muc.rooms");
+        if (rooms != null && rooms.trim().length() != 0) {
+            for (String room : rooms.split(",")) {
+                hipchat.addRoom(room.trim());
+            }
+        }
+        engine.addCollector("hipchat", hipchat);
     }
 
     private void initializeWorkflows(WorkflowEngineImpl engine, SlackerConfig config) {
