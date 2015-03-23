@@ -16,6 +16,7 @@ import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
 import com.labs2160.slacker.plugin.hipchat.HipChatCollector;
 import com.labs2160.slacker.plugin.misc.EchoAction;
 import com.labs2160.slacker.plugin.misc.MarkitStockAction;
+import com.labs2160.slacker.plugin.misc.MathAction;
 import com.labs2160.slacker.plugin.misc.PrintToConsoleEndpoint;
 import com.labs2160.slacker.plugin.misc.RandomPickerAction;
 import com.labs2160.slacker.plugin.weather.WeatherAction;
@@ -84,6 +85,13 @@ public class WorkflowEngineProvider {
         wfRandomPicker.addAction(new RandomPickerAction());
         wfRandomPicker.addEndpoint(p2c);
         engine.addWorkflow(wfRandomPicker, "pick");
+
+        Workflow wfCalculator = new Workflow("Calculator", "Evaluates mathematical expressions");
+        wfCalculator.setArgsSpecification("<expr>");
+        wfCalculator.setExampleArgs("1 + (2 * 3)");
+        wfCalculator.addAction(new MathAction());
+        wfCalculator.addEndpoint(p2c);
+        engine.addWorkflow(wfCalculator, "calc");
     }
 
 }
