@@ -1,11 +1,10 @@
-package com.labs2160.slacker.core;
+package com.labs2160.slacker.core.config;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.slf4j.Logger;
@@ -30,14 +29,12 @@ import com.labs2160.slacker.plugin.weather.WeatherAction;
 public class WorkflowEngineProvider {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowEngineProvider.class);
 
+    @Inject @Named("config")
+    private SlackerConfig config;
+
     @Produces @ApplicationScoped @Named("engine")
     public WorkflowEngine provide() throws IOException {
         // TODO: inject config and explore other Configuration classes, format (YML)
-        Properties config = new Properties();
-        final String configPath = System.getProperty("config","slacker.properties");
-        logger.info("Loading config file: {}", configPath);
-        config.load(new FileInputStream(configPath));
-
         final long start = System.currentTimeMillis();
         WorkflowEngineImpl engine = new WorkflowEngineImpl();
         initializeCollectors(engine, config);
@@ -46,13 +43,13 @@ public class WorkflowEngineProvider {
         return engine;
     }
 
-    private void initializeCollectors(WorkflowEngineImpl engine, Properties config) {
+    private void initializeCollectors(WorkflowEngineImpl engine, SlackerConfig config) {
         HipChatCollector hcListener = new HipChatCollector(config.getProperty("xmpp.host"),
                 config.getProperty("xmpp.user"), config.getProperty("xmpp.password"));
         engine.addCollector("HipChat", hcListener);
     }
 
-    private void initializeWorkflows(WorkflowEngineImpl engine, Properties config) {
+    private void initializeWorkflows(WorkflowEngineImpl engine, SlackerConfig config) {
         PrintToConsoleEndpoint p2c = new PrintToConsoleEndpoint();
 
         Workflow wfEcho = new Workflow("Echo", "Echoes messages back");
