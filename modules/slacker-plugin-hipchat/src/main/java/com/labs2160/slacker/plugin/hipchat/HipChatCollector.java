@@ -254,7 +254,7 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
                 logger.trace("Empty message from {}", msg.getFrom());
             } else {
                 logger.debug("Message from {}: {}", msg.getFrom(), msg.getBody());
-                String [] requestTokens = body.split(" ");
+                String [] requestTokens = body.split("\\s+");
 
                 if (mucKeyword.equals(requestTokens[0])) {
                     requestTokens = Arrays.copyOfRange(requestTokens, 1, requestTokens.length);
@@ -268,7 +268,7 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
             responseMsg.setBody(Emoticon.RUKM + " You need to supply arguments");
         } catch (InvalidRequestException e) {
             logger.warn("Invalid request from {}, request={} ({})", msg.getFrom(), msg.getBody(), e.getMessage());
-            responseMsg.setBody(Emoticon.SHRUG + " I could understand your gibberish");
+            responseMsg.setBody(Emoticon.SHRUG + " I could not understand your gibberish");
         } catch (SlackerException e) {
             logger.error("Error while trying to handle HipChat message from {}", msg.getFrom(), e);
             responseMsg.setBody(Emoticon.DOH + " I'm not able to help you out right now.");
