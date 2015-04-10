@@ -19,6 +19,7 @@ import com.labs2160.slacker.plugin.misc.MarkitStockAction;
 import com.labs2160.slacker.plugin.misc.MathAction;
 import com.labs2160.slacker.plugin.misc.PrintToConsoleEndpoint;
 import com.labs2160.slacker.plugin.misc.RandomPickerAction;
+import com.labs2160.slacker.plugin.slackchat.SlackChatCollector;
 import com.labs2160.slacker.plugin.weather.WeatherAction;
 
 /**
@@ -42,17 +43,29 @@ public class WorkflowEngineProvider {
     }
 
     private void initializeCollectors(WorkflowEngineImpl engine, SlackerConfig config) {
-        HipChatCollector hipchat = new HipChatCollector(config.getProperty("xmpp.host"),
-                config.getProperty("xmpp.user"), config.getProperty("xmpp.password"),
-                config.getProperty("xmpp.muc.nickname"), config.getProperty("xmpp.muc.domain"),
-                config.getProperty("xmpp.muc.keyword"));
-        String rooms = config.getProperty("xmpp.muc.rooms");
-        if (rooms != null && rooms.trim().length() != 0) {
-            for (String room : rooms.split(",")) {
+        HipChatCollector hipchat = new HipChatCollector(config.getProperty("hipchat.xmpp.host"),
+                config.getProperty("hipchat.xmpp.user"), config.getProperty("hipchat.xmpp.password"),
+                config.getProperty("hipchat.xmpp.muc.nickname"), config.getProperty("hipchat.xmpp.muc.domain"),
+                config.getProperty("hipchat.xmpp.muc.keyword"));
+        String hcRooms = config.getProperty("hipchat.xmpp.muc.rooms");
+        if (hcRooms != null && hcRooms.trim().length() != 0) {
+            for (String room : hcRooms.split(",")) {
                 hipchat.addRoom(room.trim());
             }
         }
-        engine.addCollector("hipchat", hipchat);
+        //engine.addCollector("hipchat", hipchat);
+
+        SlackChatCollector slackchat = new SlackChatCollector(config.getProperty("slackchat.xmpp.host"),
+                config.getProperty("slackchat.xmpp.user"), config.getProperty("slackchat.xmpp.password"),
+                config.getProperty("slackchat.xmpp.muc.nickname"), config.getProperty("slackchat.xmpp.muc.domain"),
+                config.getProperty("slackchat.xmpp.muc.keyword"));
+        String scRooms = config.getProperty("slackchat.xmpp.muc.rooms");
+        if (scRooms != null && scRooms.trim().length() != 0) {
+            for (String room : scRooms.split(",")) {
+                slackchat.addRoom(room.trim());
+            }
+        }
+        engine.addCollector("slackchat", slackchat);
     }
 
     private void initializeWorkflows(WorkflowEngineImpl engine, SlackerConfig config) {

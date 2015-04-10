@@ -26,6 +26,7 @@
         <module>modules/slacker-api</module>
         <module>modules/slacker-plugin-misc</module>
         <module>modules/slacker-plugin-hipchat</module>
+        <module>modules/slacker-plugin-slackchat</module>
         <module>modules/slacker-rs</module>
         <module>modules/slacker-rs-exec</module>
     </modules>
