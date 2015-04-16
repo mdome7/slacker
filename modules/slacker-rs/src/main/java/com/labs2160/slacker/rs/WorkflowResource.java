@@ -20,6 +20,8 @@ import com.labs2160.slacker.core.cdi.Eager;
 @Path("workflows")
 public class WorkflowResource {
 
+    public static final String QUERY_STRING_PARAM = "request";
+
 	private static final Logger logger = LoggerFactory.getLogger(WorkflowResource.class);
 
 	@Inject
@@ -28,10 +30,10 @@ public class WorkflowResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response get(@QueryParam("req") String req) {
+    public Response get(@QueryParam(QUERY_STRING_PARAM) String req) {
     	try {
     		if (req == null || req.trim().length() == 0) {
-        		return Response.status(Response.Status.BAD_REQUEST).entity("req parameter required").build();
+        		return Response.status(Response.Status.BAD_REQUEST).entity("\"" + QUERY_STRING_PARAM + "\" parameter is required").build();
     		} else {
     			String [] args = req.split(" ");
 	    		SlackerContext ctx = app.getWorkflowEngine().handle(new Request("REST API", args));

@@ -26,8 +26,7 @@ import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
 /**
  * Initializes the workflow engine from a YAML config file.
  *
- * TODO: replace yamlbeans with lower-level yaml reader
- * todo: cleanup and give better error messages
+ * TODO: cleanup and give better error messages for malformed input
  */
 @ApplicationScoped
 public class YAMLWorkflowEngineProvider {
@@ -80,21 +79,24 @@ public class YAMLWorkflowEngineProvider {
     private void initializeCollectors(WorkflowEngineImpl engine, List<?> collectors) {
         for (Object entry : collectors) {
             Map<String,?> collectorEntry = (Map<String,?>) entry;
-            final String name = (String) collectorEntry.get("name");
-            final String className = (String) collectorEntry.get("className");
-            final Properties configuration = parseProperties(collectorEntry, "configuration", false);
-            try {
-                logger.info("Initializing collector: {} ({})", name, className);
-                Class<?> clazz = Class.forName(className);
-                if (!RequestCollector.class.isAssignableFrom(clazz)) {
-                    throw new InitializationException("Class " + clazz.getName() + " must implement " + RequestCollector.class.getName());
-                }
+            final Boolean enabled = parseBoolean(collectorEntry, "enabled", false);
+            if (enabled == null || enabled) {
+                final String name = parseString(collectorEntry, "name", true);
+                final String className = parseString(collectorEntry, "className", true);
+                final Properties configuration = parseProperties(collectorEntry, "configuration", false);
+                try {
+                    logger.info("Initializing collector: {} ({})", name, className);
+                    Class<?> clazz = Class.forName(className);
+                    if (!RequestCollector.class.isAssignableFrom(clazz)) {
+                        throw new InitializationException("Class " + clazz.getName() + " must implement " + RequestCollector.class.getName());
+                    }
 
-                RequestCollector collector = (RequestCollector) clazz.getConstructor().newInstance();
-                collector.setConfiguration(configuration);
-                engine.addCollector(name, collector);
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                throw new InitializationException("Could not initialize collector \"" + name + "\": " + e.getMessage(), e);
+                    RequestCollector collector = (RequestCollector) clazz.getConstructor().newInstance();
+                    collector.setConfiguration(configuration);
+                    engine.addCollector(name, collector);
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                    throw new InitializationException("Could not initialize collector \"" + name + "\": " + e.getMessage(), e);
+                }
             }
         }
     }
@@ -126,6 +128,10 @@ public class YAMLWorkflowEngineProvider {
         }
     }
 
+    private Boolean parseBoolean(Map<String,?> map, String key, boolean required) {
+        return (Boolean) parseEntry(map, key, required);
+    }
+
     private String parseString(Map<String,?> map, String key, boolean required) {
         String value = (String) parseEntry(map, key, required);
         if (required && value.trim().isEmpty()) {
@@ -138,8 +144,10 @@ public class YAMLWorkflowEngineProvider {
     private Properties parseProperties(Map<String,?> map, String key, boolean required) {
         Properties config = new Properties();
         Map<String,?> configMap = (Map<String,?>) parseEntry(map, key, required);
-        for (String configKey : configMap.keySet()) {
-            config.setProperty(configKey, configMap.keySet().toString());
+        if (configMap != null) {
+            for (String configKey : configMap.keySet()) {
+                config.setProperty(configKey, configMap.get(configKey).toString());
+            }
         }
         return config;
     }
