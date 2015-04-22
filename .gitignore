@@ -1,6 +1,7 @@
 *target
 *.versionsBackup
 slacker.properties
+config.yaml
 .sass-cache
 build_and_deploy.sh
 .project

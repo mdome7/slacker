@@ -1,5 +1,7 @@
 package com.labs2160.slacker.plugin.misc;
 
+import java.util.Map;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -11,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.SlackerContext;
+import com.labs2160.slacker.api.SlackerException;
 
 /**
  * {
@@ -33,31 +35,36 @@ import com.labs2160.slacker.api.SlackerContext;
 }
  */
 public class MarkitStockAction implements Action {
-	
-	private final static Logger logger = LoggerFactory.getLogger(MarkitStockAction.class);
-	
-	private WebTarget target;
-	
-	public MarkitStockAction() {
-		Client client = ClientBuilder.newClient(new ClientConfig());
-		target = client.target("http://dev.markitondemand.com/Api/v2/Quote/json");
-	}
 
-	@Override
-	public boolean execute(SlackerContext ctx) throws SlackerException {
-		if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
-			throw new NoArgumentsFoundException("Stock symbol argument is required");
-		}
-		final String stockSymbol = ctx.getRequestArgs()[0].replaceAll("\"","");
-		MarkitStockInfo stock = target.queryParam("symbol", stockSymbol)
-				.request().accept(MediaType.APPLICATION_JSON_TYPE)
-				.get(MarkitStockInfo.class);
-		if (stock.getMessage() != null && stock.getMessage().startsWith("No symbol matches")) {
-			ctx.setResponseMessage("No match found for symbol: " + stockSymbol);
-		} else {
-			ctx.setResponseMessage(stock.toString());
-		}
-		//ctx.setOutputMessage("87.99");
-		return true;
-	}
+    private final static Logger logger = LoggerFactory.getLogger(MarkitStockAction.class);
+
+    private WebTarget target;
+
+    public MarkitStockAction() {
+        Client client = ClientBuilder.newClient(new ClientConfig());
+        target = client.target("http://dev.markitondemand.com/Api/v2/Quote/json");
+    }
+
+    @Override
+    public void setConfiguration(Map<String, ?> config) {
+        // do nothing
+    }
+
+    @Override
+    public boolean execute(SlackerContext ctx) throws SlackerException {
+        if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
+            throw new NoArgumentsFoundException("Stock symbol argument is required");
+        }
+        final String stockSymbol = ctx.getRequestArgs()[0].replaceAll("\"","");
+        MarkitStockInfo stock = target.queryParam("symbol", stockSymbol)
+                .request().accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(MarkitStockInfo.class);
+        if (stock.getMessage() != null && stock.getMessage().startsWith("No symbol matches")) {
+            ctx.setResponseMessage("No match found for symbol: " + stockSymbol);
+        } else {
+            ctx.setResponseMessage(stock.toString());
+        }
+        //ctx.setOutputMessage("87.99");
+        return true;
+    }
 }

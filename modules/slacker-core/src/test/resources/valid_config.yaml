@@ -1,0 +1,54 @@
+collectors:
+  - name:  HipChat
+    className: com.labs2160.slacker.plugin.hipchat.HipChatCollector
+    configuration:
+      user: bob
+      password: test
+      mucNickname: Bobby
+      mucKeyword: bob
+      mucRooms:
+        - room1
+        - room2
+
+  - name:  Slack
+    className: com.labs2160.slacker.plugin.slackchat.SlackChatCollector
+    configuration:
+      user: bob
+      password: test
+      host: my_org.xmpp.slack.com
+      mucNickname: Bobby
+      mucKeyword: bob
+      mucDomain: conference.my_org.xmpp.slack.com
+      mucRooms:
+        - room1
+        - room2
+
+actions:
+  - name: Echo
+    alias: echo
+    description: Echoes messages back
+    className: com.labs2160.slacker.plugin.misc.EchoAction
+    
+  - name: Stock
+    alias: stock
+    description: Retrieves the current stock price for the specified symbol
+    className: com.labs2160.slacker.plugin.misc.MarkitStockAction
+    argsSpecification: <stock symbol>
+    
+  - name: Weather
+    alias: weather
+    description: Gets the current weather for the specified location
+    className: com.labs2160.slacker.plugin.misc.yahoo.WeatherAction
+    argsSpecification: <location or zip code>
+    
+  - name: Calculator
+    alias: calc
+    description: Gets the current weather for the specified location
+    className: com.labs2160.slacker.plugin.misc.MathAction
+    argsSpecification: <mathematical expression>
+    
+  - name: Random Picker
+    alias: pick
+    description: Randomly picks one or more values from a given set of values
+    className: com.labs2160.slacker.plugin.misc.RandomPickerAction
+    argsSpecification: <num to pick> <choice 1> <choice 2> ... <choice N>

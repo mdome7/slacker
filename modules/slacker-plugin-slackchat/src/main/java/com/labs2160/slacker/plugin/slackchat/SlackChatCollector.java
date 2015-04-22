@@ -35,20 +35,11 @@ import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 
 /**
- * TLS is required for all connections.
- * The nickname used when joining rooms must match the name on the HipChat account.
- * Valid auth types are jabber:iq:auth and SASL PLAIN.
- * Communication with users from other HipChat groups is not permitted.
- * Connections are expected to be long-lived, so any clients connecting repeatedly may be rate limited.
- * Connections are dropped after 150s of inactivity. We suggest sending a single space (" ") as keepalive data every 60 seconds.
- * Room history is automatically sent when joining a room unless your JID resource is "bot".
- *
- * TODO: Rename to XMPPCollector?
+ * Collector that listens for requests via messages in Slack.
  */
 public class SlackChatCollector implements RequestCollector, ChatManagerListener, ChatMessageListener {
 
-    /** period betwen empty messages sent to HipChat server to keep connection alive */
-    private final static int KEEP_ALIVE_PERIOD_SEC = 90;
+    public final static int DEFAULT_PORT = 5222;
 
     private final static Logger logger = LoggerFactory.getLogger(SlackChatCollector.class);
 
@@ -56,50 +47,65 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
 
     private RequestHandler handler;
 
-    /** chat used for keepalive messages */
-    private Chat keepAliveChat;
-
     /** Jabber ID */
-    private final String username;
+    private String user;
+
+    private String host;
+
+    private int port;
 
     /** keyword used for this to react to message in a multi-user chat room - must be the first word of the message */
-    private final String mucKeyword;
+    private String mucKeyword;
 
     /** multi-user chat room nickname */
-    private final String mucNickname;
+    private String mucNickname;
 
     /** multi-user chat (MUC) domain (e.g. conf.hipchat.com) */
-    private final String mucDomain;
+    private String mucDomain;
+
+    private XMPPTCPConnectionConfiguration config;
 
     private Map<String,MultiUserChat> rooms;
 
-    public SlackChatCollector(String host, String username, String password, String mucNickname, String mucDomain, String mucKeyword) {
-        XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder()
-                .setHost(host).setPort(5222)
-                .setServiceName(host)
-                .setUsernameAndPassword(username, password)
-                .setResource("bot")
-                .setConnectTimeout(10000)
-                .setSendPresence(false)
-                .build();
-        this.username = username;
-        this.mucNickname = mucNickname;
-        this.mucDomain = mucDomain;
-        this.mucKeyword = mucKeyword;
+    public SlackChatCollector() {
         this.rooms = new HashMap<>();
-
-        logger.debug("username={}, mucNickname={}, mucDomain={}, mucKeyword={}", username, mucNickname, mucDomain, mucKeyword);
-        conn = new XMPPTCPConnection(config);
     }
 
-    /**
-     * Add a room to join at startup.  Do not add the Conference (MUC) domain.
-     * e.g. 1234_my_room (not 1234_my_room@muc.domain)
-     * @param roomId
-     */
-    public void addRoom(String roomId) {
-        logger.debug("Room added: {}", roomId);
-        this.rooms.put(roomId, null);
+    public SlackChatCollector(String host, String user, String password, String mucNickname, String mucDomain, String mucKeyword) {
+        this();
+        final Map<String,Object> configuration = new HashMap<>();
+        configuration.put("host", host);
+        configuration.put("user", user);
+        configuration.put("password", password);
+        configuration.put("mucNickname", mucNickname);
+        configuration.put("mucDomain", mucDomain);
+        configuration.put("mucKeyword", mucKeyword);
+        setConfiguration(configuration);
+    }
+
+    @Override
+    public void setConfiguration(Map<String, ?> configuration) {
+        host = getRequiredConfigParam(configuration, "host");
+        port = configuration.get("port") != null ? Integer.parseInt(configuration.get("port").toString()) : DEFAULT_PORT;
+        user = getRequiredConfigParam(configuration, "user");
+        mucDomain = getRequiredConfigParam(configuration, "mucDomain");
+        mucNickname = getRequiredConfigParam(configuration, "mucNickname");
+        mucKeyword = getRequiredConfigParam(configuration, "mucKeyword");
+
+        if (user.indexOf("@") < 0) {
+            user += "@" + host; // proper Jabber ID format: <user_id>@<host>
+        }
+
+        config = XMPPTCPConnectionConfiguration.builder()
+                .setHost(host).setPort(port)
+                .setServiceName(host)
+                .setUsernameAndPassword(user, (String) configuration.get("password"))
+                .setResource("bot")
+                .setConnectTimeout(10000)
+                .setSendPresence(true)
+                .build();
+        logger.debug("user={}, mucNickname={}, mucDomain={}, mucKeyword={}", user, mucNickname, mucDomain, mucKeyword);
+        conn = new XMPPTCPConnection(config);
     }
 
     @Override
@@ -108,11 +114,7 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
         connect(false);
         try {
             conn.login();
-
-            this.keepAliveChat = ChatManager.getInstanceFor(conn).createChat(username); // loopback chat
-
             ChatManager.getInstanceFor(conn).addChatListener(this);
-
             joinRooms();
             logger.info("HipChat: connected={}, authenticated={}", conn.isAuthenticated(), conn.isAuthenticated());
         } catch (XMPPException | SmackException | IOException e) {
@@ -129,6 +131,16 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
     @Override
     public boolean isActive() {
         return conn.isConnected();
+    }
+
+    /**
+     * Add a room to join at startup.  Do not add the Conference (MUC) domain.
+     * e.g. 1234_my_room (not 1234_my_room@muc.domain)
+     * @param roomId
+     */
+    public void addRoom(String roomId) {
+        logger.debug("Room added: {}", roomId);
+        this.rooms.put(roomId, null);
     }
 
     public XMPPConnection getConnection() {
@@ -156,12 +168,6 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
         sendMessage(chat, responseMsg);
     }
 
-    private boolean sendMessage(Chat chat, String message) {
-        final Message msg = new Message();
-        msg.setBody(message);
-        return sendMessage(chat, msg, 2);
-    }
-
     private boolean sendMessage(Chat chat, Message msg) {
         return sendMessage(chat, msg, 2);
     }
@@ -184,7 +190,7 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
     private boolean connect(boolean quietly) {
         if (! conn.isConnected()) {
             try {
-                logger.debug("Connecting to server");
+                logger.debug("Connecting to server {}:{}", host, port);
                 conn.connect();
             } catch (SmackException | IOException | XMPPException e) {
                 if (quietly) {
@@ -280,5 +286,13 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
         xhtmlExtension.addBody(html);
         responseMsg.addExtension(xhtmlExtension);
         return responseMsg;
+    }
+
+    private String getRequiredConfigParam(Map<String, ?> configuration, String key) {
+        final String value = (String) configuration.get(key);
+        if (value == null || value.trim().length() == 0) {
+            throw new IllegalStateException("Configuration parameter \"" + key + "\" must be specified");
+        }
+        return value;
     }
 }

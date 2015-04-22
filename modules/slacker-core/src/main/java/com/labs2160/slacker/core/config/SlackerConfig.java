@@ -1,35 +1,61 @@
 package com.labs2160.slacker.core.config;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 public class SlackerConfig {
 
-	/** max number of threads for the entire application */
-	private int maxThreads;
+    public final static int DEFAULT_MAX_THREADS = 5;
 
+    /** max number of threads for the entire application */
+    private int maxThreads;
 
-	private Properties properties;
+    /** path to config file */
+    private Path configFile;
 
-	public SlackerConfig() {}
+    private Properties properties;
 
-	public SlackerConfig(Properties properties) {
-	    maxThreads = Integer.parseInt(properties.getProperty("app.maxThreads"));
-	    this.properties = properties;
-	}
+    public SlackerConfig() {
+        this(new Properties());
+    }
 
-	public int getMaxThreads() {
-		return maxThreads;
-	}
+    public SlackerConfig(Properties properties) {
+        this.properties = properties;
+        maxThreads = getIntProperty("maxThreads", DEFAULT_MAX_THREADS);
+        String configFilePath = getStringProperty("config");
+        if (configFilePath != null) {
+            this.configFile = Paths.get(configFilePath);
+        }
+    }
 
-	public void setMaxThreads(int maxThreads) {
-		this.maxThreads = maxThreads;
-	}
+    public int getMaxThreads() {
+        return maxThreads;
+    }
 
-	public void setProperty(String key, String value) {
-	    this.properties.setProperty(key, value);
-	}
+    public void setMaxThreads(int maxThreads) {
+        this.maxThreads = maxThreads;
+    }
 
-	public String getProperty(String key) {
-	    return this.properties.getProperty(key);
-	}
+    public Path getConfigFile() {
+        return configFile;
+    }
+
+    public void setConfigFile(Path configFile) {
+        this.configFile = configFile;
+    }
+
+    private String getStringProperty(String key) {
+        return System.getProperty(key, properties.getProperty(key));
+    }
+
+    private Integer getIntProperty(String key) {
+        String value = getStringProperty(key);
+        return value != null ? Integer.parseInt(value) : null;
+    }
+
+    private int getIntProperty(String key, int def) {
+        Integer value = getIntProperty(key);
+        return value != null ? value : def;
+    }
 }

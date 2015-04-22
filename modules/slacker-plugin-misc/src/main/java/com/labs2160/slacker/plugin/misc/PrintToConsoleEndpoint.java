@@ -1,5 +1,7 @@
 package com.labs2160.slacker.plugin.misc;
 
+import java.util.Map;
+
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.Response;
 import com.labs2160.slacker.api.SlackerException;
@@ -9,10 +11,14 @@ import com.labs2160.slacker.api.SlackerException;
  */
 public class PrintToConsoleEndpoint implements Endpoint {
 
-	@Override
-	public boolean deliverResponse(Response response) throws SlackerException {
-		System.out.println(response.getMessage());
-		return true;
-	}
+    @Override
+    public void setConfiguration(Map<String, ?> config) {
+        // do nothing
+    }
 
+    @Override
+    public boolean deliverResponse(Response response) throws SlackerException {
+        System.out.println(response.getMessage());
+        return true;
+    }
 }

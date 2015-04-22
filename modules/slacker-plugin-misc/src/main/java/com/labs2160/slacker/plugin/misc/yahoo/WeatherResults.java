@@ -1,4 +1,4 @@
-package com.labs2160.slacker.plugin.weather;
+package com.labs2160.slacker.plugin.misc.yahoo;
 
 import java.util.List;
 

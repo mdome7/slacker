@@ -1,6 +1,6 @@
 package com.labs2160.slacker.api;
 
-public interface Action {
+public interface Action extends Configurable {
 
 	/**
 	 * Execute the action

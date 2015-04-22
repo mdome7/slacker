@@ -7,16 +7,16 @@ package com.labs2160.slacker.api;
  * @author mike
  *
  */
-public interface RequestCollector {
+public interface RequestCollector extends Configurable {
 
 	/**
 	 * Start the collector.
 	 * @param handler used for processing any requests this collector may generate
 	 */
 	void start(RequestHandler handler);
-	
+
 	void shutdown();
-	
+
 	boolean isActive();
 
 	/**
