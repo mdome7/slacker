@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -81,7 +82,7 @@ public class YAMLWorkflowEngineProvider {
             Map<String,?> collectorEntry = (Map<String,?>) entry;
             final String name = (String) collectorEntry.get("name");
             final String className = (String) collectorEntry.get("className");
-            final Map<String,?> configuration = parseMap(collectorEntry, "configuration", false);
+            final Properties configuration = parseProperties(collectorEntry, "configuration", false);
             try {
                 logger.info("Initializing collector: {} ({})", name, className);
                 Class<?> clazz = Class.forName(className);
@@ -106,7 +107,7 @@ public class YAMLWorkflowEngineProvider {
             final String className = parseString(actionEntry, "className", true);
             final String description = parseString(actionEntry, "description", false);
             final String alias = parseString(actionEntry, "alias", true);
-            final Map<String,?> configuration = parseMap(actionEntry, "configuration", false);
+            final Properties configuration = parseProperties(actionEntry, "configuration", false);
             try {
                 logger.info("Initializing action: {} ({})", name, className);
                 Workflow wf = new Workflow(name, description);
@@ -134,8 +135,13 @@ public class YAMLWorkflowEngineProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String,?> parseMap(Map<String,?> map, String key, boolean required) {
-        return (Map<String,?>) parseEntry(map, key, required);
+    private Properties parseProperties(Map<String,?> map, String key, boolean required) {
+        Properties config = new Properties();
+        Map<String,?> configMap = (Map<String,?>) parseEntry(map, key, required);
+        for (String configKey : configMap.keySet()) {
+            config.setProperty(configKey, configMap.keySet().toString());
+        }
+        return config;
     }
 
     private List<?> parseList(Map<String,?> map, String key, boolean required) {

@@ -4,7 +4,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Properties;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -19,7 +19,7 @@ public class RandomPickerAction implements Action {
     private static final SecureRandom RANDOM = new SecureRandom(Long.toString(System.currentTimeMillis()).getBytes());
 
     @Override
-    public void setConfiguration(Map<String, ?> config) {
+    public void setConfiguration(Properties config) {
         // do nothing
     }
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.SmackException;
@@ -73,7 +74,7 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
 
     public SlackChatCollector(String host, String user, String password, String mucNickname, String mucDomain, String mucKeyword) {
         this();
-        final Map<String,Object> configuration = new HashMap<>();
+        final Properties configuration = new Properties();
         configuration.put("host", host);
         configuration.put("user", user);
         configuration.put("password", password);
@@ -84,7 +85,7 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
     }
 
     @Override
-    public void setConfiguration(Map<String, ?> configuration) {
+    public void setConfiguration(Properties configuration) {
         host = getRequiredConfigParam(configuration, "host");
         port = configuration.get("port") != null ? Integer.parseInt(configuration.get("port").toString()) : DEFAULT_PORT;
         user = getRequiredConfigParam(configuration, "user");
@@ -288,8 +289,8 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
         return responseMsg;
     }
 
-    private String getRequiredConfigParam(Map<String, ?> configuration, String key) {
-        final String value = (String) configuration.get(key);
+    private String getRequiredConfigParam(Properties configuration, String key) {
+        final String value = configuration.getProperty(key);
         if (value == null || value.trim().length() == 0) {
             throw new IllegalStateException("Configuration parameter \"" + key + "\" must be specified");
         }

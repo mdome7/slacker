@@ -1,6 +1,6 @@
 package com.labs2160.slacker.plugin.misc;
 
-import java.util.Map;
+import java.util.Properties;
 
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.SlackerContext;
@@ -9,7 +9,7 @@ import com.labs2160.slacker.api.SlackerException;
 public class EchoAction implements Action {
 
     @Override
-    public void setConfiguration(Map<String, ?> config) {
+    public void setConfiguration(Properties config) {
         // do nothing
     }
 

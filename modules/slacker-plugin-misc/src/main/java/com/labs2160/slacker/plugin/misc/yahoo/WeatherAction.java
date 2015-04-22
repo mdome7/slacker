@@ -1,7 +1,7 @@
 package com.labs2160.slacker.plugin.misc.yahoo;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Properties;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -34,7 +34,7 @@ public class WeatherAction implements Action {
     }
 
     @Override
-    public void setConfiguration(Map<String, ?> config) {
+    public void setConfiguration(Properties config) {
         // do nothing
     }
 

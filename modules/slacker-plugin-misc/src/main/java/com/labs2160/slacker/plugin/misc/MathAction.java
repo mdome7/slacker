@@ -1,6 +1,6 @@
 package com.labs2160.slacker.plugin.misc;
 
-import java.util.Map;
+import java.util.Properties;
 
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
@@ -19,7 +19,7 @@ public class MathAction implements Action {
     }
 
     @Override
-    public void setConfiguration(Map<String, ?> config) {
+    public void setConfiguration(Properties config) {
         // do nothing
     }
 

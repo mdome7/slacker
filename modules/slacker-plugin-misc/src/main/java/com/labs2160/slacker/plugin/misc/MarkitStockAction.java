@@ -1,6 +1,6 @@
 package com.labs2160.slacker.plugin.misc;
 
-import java.util.Map;
+import java.util.Properties;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -46,7 +46,7 @@ public class MarkitStockAction implements Action {
     }
 
     @Override
-    public void setConfiguration(Map<String, ?> config) {
+    public void setConfiguration(Properties config) {
         // do nothing
     }
 
