@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.SmackException;
@@ -32,7 +33,6 @@ import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.RequestHandler;
 import com.labs2160.slacker.api.Response;
 import com.labs2160.slacker.api.ScheduledJob;
-import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 
 /**
@@ -117,15 +117,15 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
             conn.login();
             ChatManager.getInstanceFor(conn).addChatListener(this);
             joinRooms();
-            logger.info("HipChat: connected={}, authenticated={}", conn.isAuthenticated(), conn.isAuthenticated());
+            logger.info("SlackChat: connected={}, authenticated={}", conn.isAuthenticated(), conn.isAuthenticated());
         } catch (XMPPException | SmackException | IOException e) {
-            throw new IllegalStateException("Cannot initialize HipChat - " + e.getMessage(), e);
+            throw new IllegalStateException("Cannot initialize SlackChat - " + e.getMessage(), e);
         }
     }
 
     @Override
     public void shutdown() {
-        logger.debug("HipChat disconnecting");
+        logger.debug("SlackChat disconnecting");
         conn.disconnect();
     }
 
@@ -261,8 +261,8 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
                     requestTokens = Arrays.copyOfRange(requestTokens, 1, requestTokens.length);
                 }
 
-                SlackerContext ctx = handler.handle(new Request("hipchat", requestTokens));
-                responseMsg = createResponseMessage(ctx.getResponse());
+                Future<Response> future = handler.handle(new Request("slackchat", requestTokens));
+                responseMsg = createResponseMessage(future.get());
             }
         } catch (NoArgumentsFoundException e) {
             logger.warn("Missing arguments {}, request={} ({})", msg.getFrom(), msg.getBody(), e.getMessage());
@@ -271,7 +271,10 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
             logger.warn("Invalid request from {}, request={} ({})", msg.getFrom(), msg.getBody(), e.getMessage());
             responseMsg.setBody(Emoticon.SHRUG + " I could understand your gibberish");
         } catch (SlackerException e) {
-            logger.error("Error while trying to handle HipChat message from {}", msg.getFrom(), e);
+            logger.error("Error while trying to handle SlackChat message from {}", msg.getFrom(), e);
+            responseMsg.setBody(Emoticon.DOH + " I'm not able to help you out right now.");
+        } catch (Exception e) {
+            logger.error("Fatal error while trying to handle SlackChat message from {}", msg.getFrom(), e);
             responseMsg.setBody(Emoticon.DOH + " I'm not able to help you out right now.");
         }
         return responseMsg;

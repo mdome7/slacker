@@ -1,6 +1,7 @@
 package com.labs2160.slacker.plugin.rs;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,7 +15,6 @@ import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.Request;
 import com.labs2160.slacker.api.RequestHandler;
 import com.labs2160.slacker.api.Response;
-import com.labs2160.slacker.api.SlackerContext;
 
 public class CollectorServlet extends HttpServlet {
     public static final String QUERY_STRING_PARAM = "request";
@@ -41,10 +41,9 @@ public class CollectorServlet extends HttpServlet {
                 resp.getWriter().append("\"" + QUERY_STRING_PARAM + "\" parameter is required");
             } else {
                 Request request = new Request("REST API", requestString.split(" "));
-                SlackerContext ctx = handler.handle(request);
-                Response response = ctx.getResponse();
+                Future<Response> future = handler.handle(request);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().append(response.getMessage());
+                resp.getWriter().append(future.get().getMessage());
             }
         } catch (InvalidRequestException e) {
             logger.debug("Bad request: {}", e.getMessage());

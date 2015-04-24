@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.SmackException;
@@ -32,7 +33,6 @@ import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.RequestHandler;
 import com.labs2160.slacker.api.Response;
 import com.labs2160.slacker.api.ScheduledJob;
-import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 
 /**
@@ -297,8 +297,8 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
                     requestTokens = Arrays.copyOfRange(requestTokens, 1, requestTokens.length);
                 }
 
-                SlackerContext ctx = handler.handle(new Request("hipchat", requestTokens));
-                responseMsg = createResponseMessage(ctx.getResponse());
+                Future<Response> future = handler.handle(new Request("hipchat", requestTokens));
+                responseMsg = createResponseMessage(future.get());
             }
         } catch (NoArgumentsFoundException e) {
             logger.warn("Missing arguments {}, request={} ({})", msg.getFrom(), msg.getBody(), e.getMessage());
@@ -308,6 +308,9 @@ public class HipChatCollector implements RequestCollector, ChatManagerListener, 
             responseMsg.setBody(Emoticon.SHRUG + " I could not understand your gibberish");
         } catch (SlackerException e) {
             logger.error("Error while trying to handle HipChat message from {}", msg.getFrom(), e);
+            responseMsg.setBody(Emoticon.DOH + " I'm not able to help you out right now.");
+        } catch (Exception e) {
+            logger.error("Fatal error while trying to handle HipChat message from {}", msg.getFrom(), e);
             responseMsg.setBody(Emoticon.DOH + " I'm not able to help you out right now.");
         }
         return responseMsg;

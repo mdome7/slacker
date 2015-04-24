@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.Request;
-import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.core.ApplicationManager;
 import com.labs2160.slacker.core.cdi.Eager;
 
@@ -22,29 +21,29 @@ public class WorkflowResource {
 
     public static final String QUERY_STRING_PARAM = "request";
 
-	private static final Logger logger = LoggerFactory.getLogger(WorkflowResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(WorkflowResource.class);
 
-	@Inject
-	@Eager
-	private ApplicationManager app;
+    @Inject
+    @Eager
+    private ApplicationManager app;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response get(@QueryParam(QUERY_STRING_PARAM) String req) {
-    	try {
-    		if (req == null || req.trim().length() == 0) {
-        		return Response.status(Response.Status.BAD_REQUEST).entity("\"" + QUERY_STRING_PARAM + "\" parameter is required").build();
-    		} else {
-    			String [] args = req.split(" ");
-	    		SlackerContext ctx = app.getWorkflowEngine().handle(new Request("REST API", args));
-	    		return Response.ok(ctx.getResponse().getMessage()).build();
-    		}
-    	} catch (InvalidRequestException e) {
-    		logger.warn("Bad request: {}", e.getMessage());
-    		return Response.status(Response.Status.BAD_REQUEST).build();
-    	} catch (Exception e) {
-    		logger.error("Error while processing request; {}", e.getMessage(), e);
-    		return Response.status(Response.Status.BAD_REQUEST).build();
-		}
+        try {
+            if (req == null || req.trim().length() == 0) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("\"" + QUERY_STRING_PARAM + "\" parameter is required").build();
+            } else {
+                String [] args = req.split(" ");
+                app.getWorkflowEngine().handle(new Request("REST API", args));
+                return Response.ok("test").build();
+            }
+        } catch (InvalidRequestException e) {
+            logger.warn("Bad request: {}", e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (Exception e) {
+            logger.error("Error while processing request; {}", e.getMessage(), e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 }
