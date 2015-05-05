@@ -5,13 +5,13 @@ package com.labs2160.slacker.api;
  * @author mike
  *
  */
-public class Request {
+public class SlackerRequest {
 
 	private String source;
 	
 	private String [] rawArguments;
 
-	public Request(String source, String ... args) {
+	public SlackerRequest(String source, String ... args) {
 		this.source = source;
 		this.rawArguments = args;
 	}

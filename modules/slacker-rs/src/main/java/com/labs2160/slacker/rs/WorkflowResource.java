@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.InvalidRequestException;
-import com.labs2160.slacker.api.Request;
+import com.labs2160.slacker.api.SlackerRequest;
 import com.labs2160.slacker.core.ApplicationManager;
 import com.labs2160.slacker.core.cdi.Eager;
 
@@ -35,7 +35,7 @@ public class WorkflowResource {
                 return Response.status(Response.Status.BAD_REQUEST).entity("\"" + QUERY_STRING_PARAM + "\" parameter is required").build();
             } else {
                 String [] args = req.split(" ");
-                app.getWorkflowEngine().handle(new Request("REST API", args));
+                app.getWorkflowEngine().handle(new SlackerRequest("REST API", args));
                 return Response.ok("test").build();
             }
         } catch (InvalidRequestException e) {

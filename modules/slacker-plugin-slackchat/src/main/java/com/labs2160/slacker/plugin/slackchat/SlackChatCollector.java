@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.Request;
+import com.labs2160.slacker.api.SlackerRequest;
 import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.RequestHandler;
-import com.labs2160.slacker.api.Response;
+import com.labs2160.slacker.api.SlackerResponse;
 import com.labs2160.slacker.api.ScheduledJob;
 import com.labs2160.slacker.api.SlackerException;
 
@@ -261,7 +261,7 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
                     requestTokens = Arrays.copyOfRange(requestTokens, 1, requestTokens.length);
                 }
 
-                Future<Response> future = handler.handle(new Request("slackchat", requestTokens));
+                Future<SlackerResponse> future = handler.handle(new SlackerRequest("slackchat", requestTokens));
                 responseMsg = createResponseMessage(future.get());
             }
         } catch (NoArgumentsFoundException e) {
@@ -280,7 +280,7 @@ public class SlackChatCollector implements RequestCollector, ChatManagerListener
         return responseMsg;
     }
 
-    private Message createResponseMessage(Response response) {
+    private Message createResponseMessage(SlackerResponse response) {
         Message responseMsg = new Message();
         responseMsg.setBody(response.getMessage());
 

@@ -4,9 +4,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import javax.inject.Singleton;
+
+@Singleton
 public class SlackerConfig {
 
     public final static int DEFAULT_MAX_THREADS = 5;
+
+    public final static String PARAM_CONFIG = "config";
+
+    public final static String PARAM_MAX_THREADS = "maxThreads";
 
     /** max number of threads for the entire application */
     private int maxThreads;
@@ -22,8 +29,8 @@ public class SlackerConfig {
 
     public SlackerConfig(Properties properties) {
         this.properties = properties;
-        maxThreads = getIntProperty("maxThreads", DEFAULT_MAX_THREADS);
-        String configFilePath = getStringProperty("config");
+        maxThreads = getIntProperty(PARAM_MAX_THREADS, DEFAULT_MAX_THREADS);
+        String configFilePath = getStringProperty(PARAM_CONFIG);
         if (configFilePath != null) {
             this.configFile = Paths.get(configFilePath);
         }

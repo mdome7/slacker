@@ -11,7 +11,7 @@ import java.io.InputStream;
  * pieces of data in the response while it does not make sense
  * for others)
  */
-public class Response {
+public class SlackerResponse {
 
 	private String message;
 
@@ -19,9 +19,9 @@ public class Response {
 
 	private String attachedMediaType;
 
-	public Response() {}
+	public SlackerResponse() {}
 
-	public Response(String message, InputStream attachedMedia, String attachedMediaType) {
+	public SlackerResponse(String message, InputStream attachedMedia, String attachedMediaType) {
 		this.message = message;
 		this.attachedMedia = attachedMedia;
 		this.attachedMediaType = attachedMediaType;

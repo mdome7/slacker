@@ -23,9 +23,9 @@ import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.Request;
+import com.labs2160.slacker.api.SlackerRequest;
 import com.labs2160.slacker.api.RequestCollector;
-import com.labs2160.slacker.api.Response;
+import com.labs2160.slacker.api.SlackerResponse;
 import com.labs2160.slacker.api.ScheduledJob;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
@@ -131,10 +131,10 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     }
 
     @Override
-    public Future<Response> handle(final Request request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException {
-        return this.executorService.submit(new Callable<Response>() {
+    public Future<SlackerResponse> handle(final SlackerRequest request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException {
+        return this.executorService.submit(new Callable<SlackerResponse>() {
             @Override
-            public Response call() throws Exception {
+            public SlackerResponse call() throws Exception {
                 SlackerContext ctx = handleHelp(request);
                 if (ctx != null) {
                     return convertToImmutableResponse(ctx.getResponse());
@@ -153,7 +153,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                         }
                     }
 
-                    Response response = convertToImmutableResponse(ctx.getResponse());
+                    SlackerResponse response = convertToImmutableResponse(ctx.getResponse());
                     for (Endpoint endpoint : wf.getEndpoints()) {
                         if (! endpoint.deliverResponse(response)) {
                             logger.error("Error enountered executing endpoint: {}", endpoint.getClass().getName());
@@ -185,7 +185,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         return new WorkflowRequest(path, args, match.getWorkflow());
     }
 
-    private SlackerContext handleHelp(Request request) {
+    private SlackerContext handleHelp(SlackerRequest request) {
         if (request.getRawArguments()[0].equals(HELP_KEY)) {
             List<WorkflowMetadata> metadata = registry.getWorkflowMetadata();
             Collections.sort(metadata, new Comparator<WorkflowMetadata>() {
@@ -211,8 +211,8 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         return null;
     }
 
-    private Response convertToImmutableResponse(Response res) {
-        return new Response(res.getMessage(), res.getAttachedMedia(), res.getAttachedMediaType()) {
+    private SlackerResponse convertToImmutableResponse(SlackerResponse res) {
+        return new SlackerResponse(res.getMessage(), res.getAttachedMedia(), res.getAttachedMediaType()) {
 
             @Override
             public void setMessage(String message) {

@@ -1,6 +1,6 @@
 package com.labs2160.slacker.plugin.hipchat;
 
-import com.labs2160.slacker.api.Response;
+import com.labs2160.slacker.api.SlackerResponse;
 
 public class OutputUtil {
 
@@ -8,7 +8,7 @@ public class OutputUtil {
 		{"\n", "<br/>"}, {"<", "&lt;"}, {">", "&gt;"}, {" ", "&#160;"}
 	};
 
-	public static String cleanResponse(Response response) {
+	public static String cleanResponse(SlackerResponse response) {
 		String html = response.getMessage();//.replaceAll("  ", "&nbsp;&nbsp;");
 		for (String [] pair : REPLACE_PATTERNS) {
 			html = html.replaceAll(pair[0], pair[1]);

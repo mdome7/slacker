@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class ThreadExecutorProvider {
     private static final Logger logger = LoggerFactory.getLogger(ThreadExecutorProvider.class);
 
-    @Inject @Named("config")
+    @Inject
     private SlackerConfig config;
 
     @Produces @ApplicationScoped @Named("mainExecutor")

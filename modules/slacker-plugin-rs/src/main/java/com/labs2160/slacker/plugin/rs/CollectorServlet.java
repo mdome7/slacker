@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.InvalidRequestException;
-import com.labs2160.slacker.api.Request;
+import com.labs2160.slacker.api.SlackerRequest;
 import com.labs2160.slacker.api.RequestHandler;
-import com.labs2160.slacker.api.Response;
+import com.labs2160.slacker.api.SlackerResponse;
 
 public class CollectorServlet extends HttpServlet {
     public static final String QUERY_STRING_PARAM = "request";
@@ -40,8 +40,8 @@ public class CollectorServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append("\"" + QUERY_STRING_PARAM + "\" parameter is required");
             } else {
-                Request request = new Request("REST API", requestString.split(" "));
-                Future<Response> future = handler.handle(request);
+                SlackerRequest request = new SlackerRequest("REST API", requestString.split(" "));
+                Future<SlackerResponse> future = handler.handle(request);
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.getWriter().append(future.get().getMessage());
             }

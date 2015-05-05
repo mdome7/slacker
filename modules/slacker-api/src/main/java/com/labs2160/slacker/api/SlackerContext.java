@@ -15,7 +15,7 @@ public class SlackerContext {
 
 	private String [] requestArgs;
 
-	private Response response;
+	private SlackerResponse response;
 
 	private Map<String,Object> values;
 
@@ -26,7 +26,7 @@ public class SlackerContext {
 
 		this.requestArgs = requestArgs == null ? new String[0] : requestArgs;
 		this.values = new ConcurrentHashMap<>();
-		this.response = new Response();
+		this.response = new SlackerResponse();
 	}
 
 	public String [] getRequestPath() {
@@ -46,7 +46,7 @@ public class SlackerContext {
 		response.setAttachedMediaType(mediaType);
 	}
 
-	public Response getResponse() {
+	public SlackerResponse getResponse() {
 		return response;
 	}
 

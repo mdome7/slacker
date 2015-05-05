@@ -14,5 +14,5 @@ public interface RequestHandler {
      *
      * TODO: return Response instead of SlackerContext
      */
-	Future<Response> handle(Request request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException;
+	Future<SlackerResponse> handle(SlackerRequest request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException;
 }

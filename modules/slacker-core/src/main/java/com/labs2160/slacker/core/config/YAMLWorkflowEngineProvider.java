@@ -37,7 +37,7 @@ public class YAMLWorkflowEngineProvider {
     private SlackerConfig config;
 
     @Inject
-    public YAMLWorkflowEngineProvider(@Named("config") SlackerConfig config) {
+    public YAMLWorkflowEngineProvider(SlackerConfig config) {
         this.config = config;
     }
 
