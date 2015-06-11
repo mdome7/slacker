@@ -1,4 +1,4 @@
-package com.labs2160.slacker.plugin.misc;
+package com.labs2160.slacker.plugin.extra;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,36 +1,19 @@
 # Slacker
 
-## Concepts
-*Collectors* receive external requests via different channels
-(e.g. http, xmpp) or strategies.  They can then fire off certain "Actions"
-and then forward the responses back to the sources.  Collectors can be designed
-to be passive (listening) or active (polling - e.g. checking FTP sites).
-
-*Actions* perform arbitrary tasks (e.g. check stock price, retrieve weather information)
-and form responses to be delivered back to the collectors.
-
 ## Usage
-### Running the application
-Before starting slackr, make sure you have configured _config.yaml_ correctly.
-To start, simply execute on the command-line:
-```
-./run.sh
-```
+Unzip the package and execute _run.sh_.
+Log output is sent to logs/slacker.log.
 
-### Developing plugins
-Using Maven, include dependency on _com.labs2160.slacker:slacker-api_.
-```
-<dependency>
-  <groupId>com.labs2160.slacker</groupId>
-  <artifactId>slacker-api</artifactId>
-  <version>${project.version}</version>
-</dependency>
-```
-In order to develop a collector, implement the interface
-```
-com.labs2160.slacker.api.RequestCollector
-```
-In order to develop an action, implement the interface
-```
-com.labs2160.slacker.api.Action
-```
+To test, point your browser to:
+http://localhost:7000?request=echo%hello%20world
+
+## Configure
+Add plugin jars containing collectors and actions into the _lib_ folder.
+Configure them accordingly in the _config.yaml_ file located in the base directory
+of the unzipped package.
+
+## Cool Stuff
+curl http://localhost:7000/?request=stock%20aapl
+curl http://localhost:7000/?request=weather%20seattle
+curl http://localhost:7000?request=calc%207*191
+curl http://localhost:7000?request=pick%202%20larry%20moe%20curly

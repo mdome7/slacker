@@ -16,10 +16,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.SlackerContext;
-import com.labs2160.slacker.plugin.misc.yahoo.WeatherAction;
-import com.labs2160.slacker.plugin.misc.yahoo.WeatherResults;
-import com.labs2160.slacker.plugin.misc.yahoo.YahooResponse;
-import com.labs2160.slacker.plugin.misc.yahoo.WeatherResults.Forecast;
+import com.labs2160.slacker.plugin.extra.yahoo.WeatherAction;
+import com.labs2160.slacker.plugin.extra.yahoo.WeatherResults;
+import com.labs2160.slacker.plugin.extra.yahoo.YahooResponse;
+import com.labs2160.slacker.plugin.extra.yahoo.WeatherResults.Forecast;
 
 public class WeatherActionTest {
 

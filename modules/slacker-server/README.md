@@ -7,11 +7,18 @@ First prepare the executable JAR
 mvn clean package
 ```
 
-Then, run it and specify where the configuration file is located.  For example:
+Then, run it and specify where the configuration file is located.
+
+To run using maven:
 ```
-java -Dconfig=modules/slacker-rs-exec/config.yaml -jar modules/slacker-rs-exec/target/slacker-rs-exec-1.0-SNAPSHOT-exec.jar
+mvn exec:java -Dconfig=src/main/dist/config.yaml
 ```
 
-Command line parameters:
+Or simply:
+```
+java -Dconfig=path/to/config.yaml -jar modules/slacker-rs-exec/target/slacker-server-1.0-SNAPSHOT-exec.jar
+```
+
+Parameters:
 * config - (required) path to the configuration file
 * maxThreads - (optional) maximum number of threads used for processing requests (default=5)

@@ -1,4 +1,4 @@
-package com.labs2160.slacker.plugin.misc.yahoo;
+package com.labs2160.slacker.plugin.extra.yahoo;
 
 import java.io.IOException;
 import java.util.Properties;
