@@ -17,11 +17,18 @@ import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 
 /**
  * Arguments: zip_code -
  * Output Message: weather prediction for today
  */
+@ActionDescription(
+        name = "Weather",
+        description = "Returns today's weather forecast for the specified location",
+        argsSpec = "<city or zip code>",
+        argsExample = "Seattle, WA"
+)
 public class WeatherAction implements Action {
 
     private static Logger logger = LoggerFactory.getLogger(WeatherAction.class);

@@ -9,7 +9,14 @@ import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 
+@ActionDescription(
+        name = "Calculator",
+        description = "Evaluates mathematical expressions and returns results",
+        argsSpec = "<mathematical expression>",
+        argsExample = "(1 + 5) / 2"
+)
 public class MathAction implements Action {
 
     private Evaluator evaluator;

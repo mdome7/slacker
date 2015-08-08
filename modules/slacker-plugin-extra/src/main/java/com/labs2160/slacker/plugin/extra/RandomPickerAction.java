@@ -12,7 +12,14 @@ import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 
+@ActionDescription(
+        name = "Random Picker",
+        description = "Randomly picks N values from a list of supplied values",
+        argsSpec = "<N: number of values to pick> <value 1> <value 2> ... <value N>",
+        argsExample = "2 Peter Lois Stewey Meg Chris"
+)
 public class RandomPickerAction implements Action {
 
     /** randomizer */

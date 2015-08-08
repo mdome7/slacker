@@ -23,12 +23,12 @@ import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.InvalidRequestException;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.SlackerRequest;
 import com.labs2160.slacker.api.RequestCollector;
-import com.labs2160.slacker.api.SlackerResponse;
 import com.labs2160.slacker.api.ScheduledJob;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.SlackerRequest;
+import com.labs2160.slacker.api.SlackerResponse;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
 
@@ -167,7 +167,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     @Override
     public WorkflowRegistry getRegistry() {
-        return null;
+        return registry;
     }
 
     private WorkflowRequest parseWorkflowRequest(String [] origArgs) throws InvalidRequestException {
@@ -185,6 +185,11 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         return new WorkflowRequest(path, args, match.getWorkflow());
     }
 
+    /**
+     * TODO: move this out of the engine.
+     * @param request
+     * @return
+     */
     private SlackerContext handleHelp(SlackerRequest request) {
         if (request.getRawArguments()[0].equals(HELP_KEY)) {
             List<WorkflowMetadata> metadata = registry.getWorkflowMetadata();
@@ -201,8 +206,10 @@ public class WorkflowEngineImpl implements WorkflowEngine {
             for (WorkflowMetadata wm : metadata) {
                 sb.append(StringUtils.join(wm.getPath(), " "))
                     .append(" ")
-                    .append(wm.getArgsSpecification()).append("\n")
-                    .append("    ").append(wm.getName()).append(" - ").append(wm.getDescription())
+                    .append(trimToEmpty(wm.getArgsSpecification()))
+                    .append("\n").append("    ")
+                    .append(trimToEmpty(wm.getName()))
+                    .append(" - ").append(trimToEmpty(wm.getDescription()))
                     .append("\n");
             }
             ctx.setResponseMessage(sb.toString());
@@ -229,5 +236,9 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 throw new UnsupportedOperationException("Cannot set message on this response object");
             }
         };
+    }
+
+    private String trimToEmpty(String orig) {
+        return orig == null ? "" : orig.trim();
     }
 }

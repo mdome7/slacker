@@ -112,9 +112,10 @@ public class YAMLWorkflowEngineProvider {
             final Properties configuration = parseProperties(actionEntry, "configuration", false);
             try {
                 logger.info("Initializing action: {} ({})", name, className);
-                Workflow wf = new Workflow(name, description);
 
                 Class<?> clazz = Class.forName(className);
+
+                Workflow wf = new Workflow(name, description);
                 if (!Action.class.isAssignableFrom(clazz)) {
                     throw new InitializationException("Class " + clazz.getName() + " must implement " + Action.class.getName());
                 }

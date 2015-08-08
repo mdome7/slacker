@@ -5,7 +5,14 @@ import java.util.Properties;
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 
+@ActionDescription(
+        name = "Echo",
+        description = "Simply echoes back any arguments passed in",
+        argsSpec = "<string to echo back>",
+        argsExample = "\"hello world\""
+)
 public class EchoAction implements Action {
 
     @Override

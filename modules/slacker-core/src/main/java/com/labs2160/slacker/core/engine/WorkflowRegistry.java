@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class WorkflowRegistry {
+
+    private final static Logger logger = LoggerFactory.getLogger(WorkflowRegistry.class);
 
     private RegistryNode root;
 
@@ -58,14 +63,19 @@ public class WorkflowRegistry {
         return metadata;
     }
 
-    void getMetadataHelper(RegistryNode node, List<WorkflowMetadata> metadata) {
+    private void getMetadataHelper(RegistryNode node, List<WorkflowMetadata> metadata) {
         final Workflow wf = node.getWorkflow();
         if (wf != null) {
+            // TODO: finalize workflow theory
+            // Currently, a workflow is synonymous to a single action but could potentially
+            // be a true workflow with multiple actions, endpoints and control logic.
+            // So for now, use action metadata as defaults
+            ActionMetadata am = ActionMetadataExtractor.extract(wf.getActions().get(0).getClass());
             metadata.add(new WorkflowMetadata(node.getPath(),
-                    wf.getName(),
-                    wf.getDescription(),
-                    wf.getArgsSpecification(),
-                    wf.getExampleArgs()));
+                    wf.getName() != null ? wf.getName() : am.getName(),
+                    wf.getDescription() != null ? wf.getDescription() : am.getDescription(),
+                    wf.getArgsSpecification() != null ? wf.getArgsSpecification() : am.getArgsSpec(),
+                    wf.getExampleArgs() != null ? wf.getExampleArgs() : am.getArgsExample()));
         }
         for (RegistryNode child : node.getChildren()) {
             getMetadataHelper(child, metadata);

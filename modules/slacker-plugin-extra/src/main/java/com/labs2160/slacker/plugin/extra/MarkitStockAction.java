@@ -15,6 +15,7 @@ import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 
 /**
  * {
@@ -34,6 +35,12 @@ import com.labs2160.slacker.api.SlackerException;
     "Open":519.175
 }
  */
+@ActionDescription(
+        name = "Stock Price",
+        description = "Retrieves current price for the specified stock symbol",
+        argsSpec = "<stock symbol>",
+        argsExample = "AAPL"
+)
 public class MarkitStockAction implements Action {
 
     private final static Logger logger = LoggerFactory.getLogger(MarkitStockAction.class);

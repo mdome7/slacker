@@ -16,7 +16,7 @@ mvn exec:java -Dconfig=src/main/dist/config.yaml
 
 Or simply:
 ```
-java -Dconfig=path/to/config.yaml -jar modules/slacker-rs-exec/target/slacker-server-1.0-SNAPSHOT-exec.jar
+java -Dconfig=src/main/dist/config.yaml -jar target/slacker-server-1.0-SNAPSHOT-exec.jar
 ```
 
 Parameters:

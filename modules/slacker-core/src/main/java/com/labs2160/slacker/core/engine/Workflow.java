@@ -14,23 +14,23 @@ public class Workflow {
 	private String name;
 
 	private String description;
-	
+
 	private String argsSpecification;
 
 	private String exampleArgs;
 
 	private List<Action> actions;
-	
+
 	private List<Endpoint> endpoints;
-	
+
 	public Workflow(String name, String description) {
 		this.name = name;
 		this.description = description;
-		this.argsSpecification = "";
+		this.argsSpecification = null;
 		this.actions = new ArrayList<>();
 		this.endpoints = new ArrayList<>();
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -54,11 +54,11 @@ public class Workflow {
 	public void setExampleArgs(String exampleArgs) {
 		this.exampleArgs = exampleArgs;
 	}
-	
+
 	public void addAction(Action a) {
 		actions.add(a);
 	}
-	
+
 	public void addEndpoint(Endpoint e) {
 		endpoints.add(e);
 	}
@@ -78,7 +78,7 @@ public class Workflow {
 	public void setEndpoints(List<Endpoint> endpoints) {
 		this.endpoints = endpoints;
 	}
-	
+
 	public String getArgsSpecification() {
 		return argsSpecification;
 	}
