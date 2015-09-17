@@ -1,8 +1,6 @@
 package com.labs2160.slacker.core;
 
 import java.util.Date;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;

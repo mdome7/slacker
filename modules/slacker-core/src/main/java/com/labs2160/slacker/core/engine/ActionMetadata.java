@@ -50,4 +50,10 @@ public class ActionMetadata {
         return argsExample;
     }
 
+    @Override
+    public String toString() {
+        return "[" + actionClass + "]"
+                + " name=" + name
+                + ", description=" + description;
+    }
 }

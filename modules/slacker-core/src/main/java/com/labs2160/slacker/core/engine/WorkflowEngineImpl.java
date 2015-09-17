@@ -1,6 +1,7 @@
 package com.labs2160.slacker.core.engine;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +30,9 @@ import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.SlackerRequest;
 import com.labs2160.slacker.api.SlackerResponse;
+import com.labs2160.slacker.core.event.WorkflowExecutionEvent;
+import com.labs2160.slacker.core.event.WorkflowExecutionEventType;
+import com.labs2160.slacker.core.event.WorkflowExecutionListener;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
 
@@ -50,33 +54,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     /** in-memory registry of all collectors */
     private final Map<String,RequestCollector> collectors;
 
-    private class WorkflowRequest {
-        private String [] path;
-        private String [] args;
-        private Workflow workflow;
-
-        public WorkflowRequest(String [] path, String [] args, Workflow wf) {
-            this.path = path;
-            this.args = args;
-            this.workflow = wf;
-        }
-
-        public String [] getPath() {
-            return path;
-        }
-
-        public String [] getArgs() {
-            return args;
-        }
-
-        public Workflow getWorkflow() {
-            return workflow;
-        }
-    }
+    private final List<WorkflowExecutionListener> executionListeners;
 
     public WorkflowEngineImpl() {
         registry = new WorkflowRegistry();
         collectors = new ConcurrentHashMap<>();
+        executionListeners = new ArrayList<>();
     }
 
     @Override
@@ -131,6 +114,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     }
 
     @Override
+    public void addWorkflowExecutionListener(WorkflowExecutionListener listener) {
+        logger.info("Adding execution listener: {}", listener.getClass().getName());
+        this.executionListeners.add(listener);
+    }
+
+    @Override
     public Future<SlackerResponse> handle(final SlackerRequest request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException {
         return this.executorService.submit(new Callable<SlackerResponse>() {
             @Override
@@ -139,30 +128,59 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 if (ctx != null) {
                     return convertToImmutableResponse(ctx.getResponse());
                 } else {
-                    WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
+                    final WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
                     logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
-                    Workflow wf = wfr.getWorkflow();
-                    if (wf == null) {
-                        throw new InvalidRequestException("Cannot find workflow for args: " + StringUtils.join(wfr.getPath(), " "));
-                    }
-
-                    ctx = new SlackerContext(wfr.getPath(), wfr.getArgs());
-                    for (Action action : wf.getActions()) {
-                        if (! action.execute(ctx)) {
-                            logger.error("Error enountered executing action: {}", action.getClass().getName());
-                        }
-                    }
-
-                    SlackerResponse response = convertToImmutableResponse(ctx.getResponse());
-                    for (Endpoint endpoint : wf.getEndpoints()) {
-                        if (! endpoint.deliverResponse(response)) {
-                            logger.error("Error enountered executing endpoint: {}", endpoint.getClass().getName());
-                        }
-                    }
-                    return response;
+                    return executeWorkflow(wfr);
                 }
             }
         });
+    }
+
+    private SlackerResponse executeWorkflow(WorkflowRequest wfr) throws SlackerException {
+        Workflow wf = wfr.getWorkflow();
+        if (wf == null) {
+            throw new InvalidRequestException("Cannot find workflow for args: " + StringUtils.join(wfr.getPath(), " "));
+        }
+
+        final SlackerContext ctx = new SlackerContext(wfr.getPath(), wfr.getArgs());
+
+        final String workflowId = getNewWorkflowId();
+
+        if (listenersExist()) {
+            notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.WORKFLOW_START, workflowId, wfr, true, System.currentTimeMillis()));
+        }
+        for (Action action : wf.getActions()) {
+            if (listenersExist()) {
+                notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.ACTION_START, workflowId, wfr, true, System.currentTimeMillis()));
+            }
+            boolean successful = action.execute(ctx);
+            if (listenersExist()) {
+                notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.ACTION_FINISH, workflowId, wfr, successful, System.currentTimeMillis()));
+            }
+            if (! successful) {
+                logger.error("Error enountered executing action: {}", action.getClass().getName());
+                break; // stop execution
+            }
+        }
+
+        SlackerResponse response = convertToImmutableResponse(ctx.getResponse());
+        for (Endpoint endpoint : wf.getEndpoints()) {
+            if (listenersExist()) {
+                notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.ENDPOINT_START, workflowId, wfr, true, System.currentTimeMillis()));
+            }
+            boolean successful = endpoint.deliverResponse(response);
+            if (listenersExist()) {
+                notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.ENDPOINT_FINISH, workflowId, wfr, successful, System.currentTimeMillis()));
+            }
+            if (! successful) {
+                logger.error("Error enountered executing endpoint: {}", endpoint.getClass().getName());
+            }
+        }
+
+        if (listenersExist()) {
+            notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.WORKFLOW_FINISH, workflowId, wfr, true, System.currentTimeMillis()));
+        }
+        return response;
     }
 
     @Override
@@ -216,6 +234,25 @@ public class WorkflowEngineImpl implements WorkflowEngine {
             return ctx;
         }
         return null;
+    }
+
+    private boolean listenersExist() {
+        return ! executionListeners.isEmpty();
+    }
+
+    private void notifyListeners(WorkflowExecutionEvent event) {
+        for (WorkflowExecutionListener listener : executionListeners) {
+            try {
+                listener.notifyEvent(event);
+            } catch (Exception e) {
+                logger.error("Failed to notify listener of event {} : {}", event, e);
+            }
+        }
+    }
+
+    // TODO: use a GUID
+    private String getNewWorkflowId() {
+        return "WF" + System.currentTimeMillis();
     }
 
     private SlackerResponse convertToImmutableResponse(SlackerResponse res) {

@@ -46,9 +46,9 @@ public class YAMLWorkflowEngineProvider {
         try {
             final long start = System.currentTimeMillis();
             WorkflowEngineImpl engine = new WorkflowEngineImpl();
-            Map<String,?> config = getConfig();
-            initializeCollectors(engine, parseList(config, "collectors", true));
-            initializeWorkflows(engine, parseList(config, "actions", true));
+            Map<String,?> configuration = getConfig();
+            initializeCollectors(engine, parseList(configuration, "collectors", true));
+            initializeWorkflows(engine, parseList(configuration, "actions", true));
             logger.debug("Engine initialized in {} ms", System.currentTimeMillis() - start);
             return engine;
         } catch (InitializationException e) {
@@ -88,7 +88,8 @@ public class YAMLWorkflowEngineProvider {
                     logger.info("Initializing collector: {} ({})", name, className);
                     Class<?> clazz = Class.forName(className);
                     if (!RequestCollector.class.isAssignableFrom(clazz)) {
-                        throw new InitializationException("Class " + clazz.getName() + " must implement " + RequestCollector.class.getName());
+                        logger.warn("Class {} does not implement {}", clazz.getName(), RequestCollector.class.getName());
+                        // throw new InitializationException("Class " + clazz.getName() + " must implement " + RequestCollector.class.getName());
                     }
 
                     RequestCollector collector = (RequestCollector) clazz.getConstructor().newInstance();

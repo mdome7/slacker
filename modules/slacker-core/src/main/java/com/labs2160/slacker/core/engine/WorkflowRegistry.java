@@ -63,6 +63,11 @@ public class WorkflowRegistry {
         return metadata;
     }
 
+    public Workflow findWorkflow(final String ... path) {
+        final RegistryNode node = findWorkflowMatch(path);
+        return node == null ? null : node.getWorkflow();
+    }
+
     private void getMetadataHelper(RegistryNode node, List<WorkflowMetadata> metadata) {
         final Workflow wf = node.getWorkflow();
         if (wf != null) {

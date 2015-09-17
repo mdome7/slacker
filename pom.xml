@@ -6,15 +6,15 @@
     <artifactId>slacker-parent</artifactId>
     <name>slacker-parent</name>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <properties>
         <skipTests>true</skipTests>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <cdi.api-version>1.1</cdi.api-version>
         <logback-version>1.0.9</logback-version>
-        <jackson-version>2.5.0</jackson-version>
-        <jersey-version>2.15</jersey-version>
+        <jackson-version>2.5.4</jackson-version>
+        <jersey-version>2.21</jersey-version>
         <jetty-version>9.2.6.v20141205</jetty-version>
         <jsf-version>2.2.9</jsf-version>
         <org.springframework-version>4.0.6.RELEASE</org.springframework-version>
