@@ -1,5 +1,5 @@
 collectors:
-  - name:  REST API
+  - name: REST API
     className: com.labs2160.slacker.plugin.rs.RESTCollector
     configuration:
       port: 7000
@@ -24,3 +24,14 @@ actions:
   - name: Random Picker
     alias: pick
     className: com.labs2160.slacker.plugin.extra.RandomPickerAction
+
+  - name: StockToHipChat
+    alias: stocktohipchat
+    className: com.labs2160.slacker.plugin.extra.MarkitStockAction
+    endPoints: com.labs2160.slacker.plugin.extra.scala.HipChat
+
+triggers:
+  - name: Morning
+    interval: day
+    action: stocktohipchat
+    requests: stock orcl;stock msft

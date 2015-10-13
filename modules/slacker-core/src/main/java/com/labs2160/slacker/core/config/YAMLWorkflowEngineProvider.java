@@ -18,7 +18,10 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import com.labs2160.slacker.api.Action;
+import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.core.engine.RegistryNode;
+import com.labs2160.slacker.core.engine.Trigger;
 import com.labs2160.slacker.core.engine.Workflow;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
@@ -49,6 +52,7 @@ public class YAMLWorkflowEngineProvider {
             Map<String,?> configuration = getConfig();
             initializeCollectors(engine, parseList(configuration, "collectors", true));
             initializeWorkflows(engine, parseList(configuration, "actions", true));
+            initializeTriggers(engine, parseList(configuration, "triggers", true));
             logger.debug("Engine initialized in {} ms", System.currentTimeMillis() - start);
             return engine;
         } catch (InitializationException e) {
@@ -107,26 +111,57 @@ public class YAMLWorkflowEngineProvider {
         for (Object entry : actions) {
             Map<String,?> actionEntry = (Map<String,?>) entry;
             final String name = parseString(actionEntry, "name", true);
-            final String className = parseString(actionEntry, "className", true);
+            final String actionClassName = parseString(actionEntry, "className", true);
             final String description = parseString(actionEntry, "description", false);
             final String alias = parseString(actionEntry, "alias", true);
+            final String endPoints = parseString(actionEntry, "endPoints", false);
             final Properties configuration = parseProperties(actionEntry, "configuration", false);
             try {
-                logger.info("Initializing action: {} ({})", name, className);
-
-                Class<?> clazz = Class.forName(className);
-
+                logger.info("Initializing action: {} ({})", name, actionClassName);
                 Workflow wf = new Workflow(name, description);
+
+                Class<?> clazz = Class.forName(actionClassName);
                 if (!Action.class.isAssignableFrom(clazz)) {
                     throw new InitializationException("Class " + clazz.getName() + " must implement " + Action.class.getName());
                 }
                 Action action = (Action) clazz.getConstructor().newInstance();
                 action.setConfiguration(configuration);
                 wf.addAction(action);
+
+                for (String endpointClassName : (endPoints == null || endPoints.isEmpty() ? new String[]{} : endPoints.split(";"))) {
+                    clazz = Class.forName(endpointClassName);
+                    if (!Endpoint.class.isAssignableFrom(clazz)) {
+                        throw new InitializationException("Class " + clazz.getName() + " must implement " + Endpoint.class.getName());
+                    }
+                    Endpoint endpoint = (Endpoint) clazz.getConstructor().newInstance();
+                    endpoint.setConfiguration(configuration);
+                    wf.addEndpoint(endpoint);
+                }
+
                 engine.addWorkflow(wf, alias.split(" "));
             } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new InitializationException("Could not initialize action \"" + name + "\": " + e.getMessage(), e);
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initializeTriggers(WorkflowEngineImpl engine, List<?> triggers) {
+        for (Object entry : triggers) {
+            Map<String,?> triggerEntry = (Map<String,?>) entry;
+            final String name = parseString(triggerEntry, "name", true);
+            final String interval = parseString(triggerEntry, "interval", true);
+            final String action = parseString(triggerEntry, "action", true);
+            final String requests = parseString(triggerEntry, "requests", true);
+            final Properties configuration = parseProperties(triggerEntry, "configuration", false);
+
+            final RegistryNode match = engine.getRegistry().findWorkflowMatch(action);
+            Workflow wf = match.getWorkflow();
+
+            logger.info("Initializing trigger: {} with interval {}", name, interval);
+            Trigger trigger = new Trigger(name, interval, wf, requests);
+            trigger.setConfiguration(configuration);
+            engine.addTrigger(name, trigger);
         }
     }
 

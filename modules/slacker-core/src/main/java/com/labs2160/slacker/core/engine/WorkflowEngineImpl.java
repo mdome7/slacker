@@ -56,10 +56,14 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     private final List<WorkflowExecutionListener> executionListeners;
 
+    /** in-memory registry of all triggers */
+    private final Map<String,Trigger> triggers;
+
     public WorkflowEngineImpl() {
         registry = new WorkflowRegistry();
         collectors = new ConcurrentHashMap<>();
         executionListeners = new ArrayList<>();
+        triggers = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -79,7 +83,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 ScheduledJob [] jobs = collector.getScheduledJobs();
                 if (jobs != null) {
                     for (ScheduledJob job : jobs) {
-                        logger.debug("Scheduling job for {} with perio of {} s", collectorName, job.getPeriod());
+                        logger.debug("Scheduling job for {} with period of {} s", collectorName, job.getPeriod());
                         ScheduledFuture<?> jobFuture = scheduler.scheduleAtFixedRate(
                                 job, INITIAL_SCHEDULE_DELAY_SEC, job.getPeriod(), TimeUnit.SECONDS);
                         // TODO: keep track of jobFutures per collector if we want collectors to be shutdown at runtime
@@ -90,6 +94,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 logger.error("Could not start collector {} due to error.", collectorName, e);
                 logger.warn("Skipping collector {} but will continue startup.", collectorName);
             }
+        }
+
+        for (String triggerName : triggers.keySet()) {
+            logger.debug("Starting trigger: {}", triggerName);
+            Trigger trigger = triggers.get(triggerName);
+            trigger.start(this);
         }
         logger.info("Engine started in {} ms", System.currentTimeMillis() - start);
     }
@@ -111,6 +121,11 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     public void addWorkflow(Workflow wf, String ... path) {
         registry.addWorkflow(wf, path);
         logger.info("Added workflow: {} - {}", path, wf.getName());
+    }
+
+    public void addTrigger(String name, Trigger trigger) {
+        triggers.put(name, trigger);
+        logger.info("Trigger \"{}\" added", name);
     }
 
     @Override
@@ -158,7 +173,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.ACTION_FINISH, workflowId, wfr, successful, System.currentTimeMillis()));
             }
             if (! successful) {
-                logger.error("Error enountered executing action: {}", action.getClass().getName());
+                logger.error("Error encountered executing action: {}", action.getClass().getName());
                 break; // stop execution
             }
         }
@@ -173,7 +188,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.ENDPOINT_FINISH, workflowId, wfr, successful, System.currentTimeMillis()));
             }
             if (! successful) {
-                logger.error("Error enountered executing endpoint: {}", endpoint.getClass().getName());
+                logger.error("Error encountered executing endpoint: {}", endpoint.getClass().getName());
             }
         }
 
