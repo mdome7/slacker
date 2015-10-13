@@ -33,6 +33,7 @@ import com.labs2160.slacker.api.SlackerResponse;
 import com.labs2160.slacker.core.event.WorkflowExecutionEvent;
 import com.labs2160.slacker.core.event.WorkflowExecutionEventType;
 import com.labs2160.slacker.core.event.WorkflowExecutionListener;
+import com.labs2160.slacker.core.util.UUIDUtil;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
 
@@ -138,13 +139,10 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     private SlackerResponse executeWorkflow(WorkflowRequest wfr) throws SlackerException {
         Workflow wf = wfr.getWorkflow();
-        if (wf == null) {
-            throw new InvalidRequestException("Cannot find workflow for args: " + StringUtils.join(wfr.getPath(), " "));
-        }
 
         final SlackerContext ctx = new SlackerContext(wfr.getPath(), wfr.getArgs());
 
-        final String workflowId = getNewWorkflowId();
+        final String workflowId = UUIDUtil.generateRandomUUID();
 
         if (listenersExist()) {
             notifyListeners(new WorkflowExecutionEvent(WorkflowExecutionEventType.WORKFLOW_START, workflowId, wfr, true, System.currentTimeMillis()));
@@ -193,13 +191,12 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         // find a matching workflow by concatenating args to form
         // possible paths.
         final RegistryNode match = registry.findWorkflowMatch(origArgs);
-        if (match == null) {
+        if (match == null || match.getWorkflow() == null) {
             throw new InvalidRequestException("Cannot find workflow for args: " + StringUtils.join(origArgs, " "));
         }
 
         String [] path = match.getPath();
         String [] args = origArgs.length > path.length ? Arrays.copyOfRange(origArgs, path.length, origArgs.length) : null;
-
         return new WorkflowRequest(path, args, match.getWorkflow());
     }
 
@@ -248,11 +245,6 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 logger.error("Failed to notify listener of event {} : {}", event, e);
             }
         }
-    }
-
-    // TODO: use a GUID
-    private String getNewWorkflowId() {
-        return "WF" + System.currentTimeMillis();
     }
 
     private SlackerResponse convertToImmutableResponse(SlackerResponse res) {
