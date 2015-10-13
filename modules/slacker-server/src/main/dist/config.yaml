@@ -1,26 +1,26 @@
 collectors:
-  - name:  REST API
+  - name: REST API
     className: com.labs2160.slacker.plugin.rs.RESTCollector
     configuration:
       port: 7000
 
-actions:
+workflows:
   - name: Echo
     alias: echo
-    className: com.labs2160.slacker.plugin.extra.EchoAction
+    actionClass: com.labs2160.slacker.plugin.extra.EchoAction
 
   - name: Stock
     alias: stock
-    className: com.labs2160.slacker.plugin.extra.MarkitStockAction
+    actionClass: com.labs2160.slacker.plugin.extra.MarkitStockAction
 
   - name: Weather
     alias: weather
-    className: com.labs2160.slacker.plugin.extra.yahoo.WeatherAction
+    actionClass: com.labs2160.slacker.plugin.extra.yahoo.WeatherAction
 
   - name: Calculator
     alias: calc
-    className: com.labs2160.slacker.plugin.extra.MathAction
+    actionClass: com.labs2160.slacker.plugin.extra.MathAction
 
   - name: Random Picker
     alias: pick
-    className: com.labs2160.slacker.plugin.extra.RandomPickerAction
+    actionClass: com.labs2160.slacker.plugin.extra.RandomPickerAction
