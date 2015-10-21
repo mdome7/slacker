@@ -1,4 +1,4 @@
-package com.labs2160.slacker.core.config;
+package com.labs2160.slacker.core;
 
 public class InitializationException extends RuntimeException {
 

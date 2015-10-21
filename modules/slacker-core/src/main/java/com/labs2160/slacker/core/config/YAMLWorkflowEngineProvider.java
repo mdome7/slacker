@@ -19,6 +19,7 @@ import org.yaml.snakeyaml.error.YAMLException;
 
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.core.InitializationException;
 import com.labs2160.slacker.core.engine.Workflow;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
