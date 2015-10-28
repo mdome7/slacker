@@ -66,7 +66,6 @@ public class DirClassLoaderRegistry {
     }
 
     private ClassLoader createClassLoader(Path path) throws IOException {
-        ClassLoader systemCl = ClassLoader.getSystemClassLoader();
         List<URL> urls = new ArrayList<URL>();
         try (DirectoryStream<Path> jars = Files.newDirectoryStream(path, "*.jar")) {
             for (Path jar : jars) {
@@ -76,7 +75,7 @@ public class DirClassLoaderRegistry {
         } catch (IOException e) {
             throw e;
         }
-        return new ChildFirstClassLoader(urls.toArray(new URL[0]), systemCl);
+        return new ChildFirstClassLoader(urls.toArray(new URL[0]), DirClassLoaderRegistry.class.getClassLoader());
     }
 
 }

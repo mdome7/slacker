@@ -17,6 +17,13 @@
         <exclude>*</exclude>
       </excludes>
     </fileSet>
+    <fileSet>
+      <directory>src/main/dist</directory>
+      <outputDirectory>/plugins</outputDirectory>
+      <excludes>
+        <exclude>*</exclude>
+      </excludes>
+    </fileSet>
   </fileSets>
   <dependencySets>
     <dependencySet>

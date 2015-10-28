@@ -3,6 +3,7 @@ package com.labs2160.slacker.core.config;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -19,12 +20,13 @@ import org.yaml.snakeyaml.error.YAMLException;
 
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.Endpoint;
-import com.labs2160.slacker.api.Trigger;
 import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.api.Trigger;
 import com.labs2160.slacker.core.InitializationException;
 import com.labs2160.slacker.core.engine.Workflow;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
+import com.labs2160.slacker.core.plugin.PluginManager;
 
 /**
  * Initializes the workflow engine from a YAML config file.
@@ -37,11 +39,14 @@ public class YAMLWorkflowEngineProvider {
 
     private static final Yaml YAML = new Yaml();
 
-    private SlackerConfig config;
+    private final SlackerConfig config;
+
+    private final PluginManager pluginManager;
 
     @Inject
     public YAMLWorkflowEngineProvider(SlackerConfig config) {
         this.config = config;
+        this.pluginManager = new PluginManager(config.getPluginDir());
     }
 
     @Produces @ApplicationScoped @Named("engine")
@@ -51,7 +56,7 @@ public class YAMLWorkflowEngineProvider {
             WorkflowEngineImpl engine = new WorkflowEngineImpl();
             Map<String,?> configuration = getConfig();
             initializeCollectors(engine, parseList(configuration, "collectors", true));
-            initializeWorkflows(engine, parseList(configuration, "workflows", true));
+            initializeWorkflows(engine, parseList(configuration, "actions", true));
             initializeTriggers(engine, parseList(configuration, "triggers", false));
             logger.debug("Engine initialized in {} ms", System.currentTimeMillis() - start);
             return engine;
@@ -70,7 +75,6 @@ public class YAMLWorkflowEngineProvider {
                 logger.info("Loading configuration: {}", config.getConfigFile());
                 yamlConfig = (Map<String, ?>) YAML.load(new FileReader(config.getConfigFile().toFile()));
             } else {
-                // TODO read default_config.yaml in classpath
                 throw new IllegalStateException("Must specify config file!");
             }
         } catch (YAMLException | FileNotFoundException e) {
@@ -86,20 +90,14 @@ public class YAMLWorkflowEngineProvider {
             final Boolean enabled = parseBoolean(collectorEntry, "enabled", false);
             if (enabled == null || enabled) {
                 final String name = parseString(collectorEntry, "name", true);
+                final String plugin = parseString(collectorEntry, "plugin", false);
                 final String className = parseString(collectorEntry, "className", true);
                 final Properties configuration = parseProperties(collectorEntry, "configuration", false);
                 try {
-                    logger.info("Initializing collector: {} ({})", name, className);
-                    Class<?> clazz = Class.forName(className);
-                    if (!RequestCollector.class.isAssignableFrom(clazz)) {
-                        logger.warn("Class {} does not implement {}", clazz.getName(), RequestCollector.class.getName());
-                        // throw new InitializationException("Class " + clazz.getName() + " must implement " + RequestCollector.class.getName());
-                    }
-
-                    RequestCollector collector = (RequestCollector) clazz.getConstructor().newInstance();
+                    RequestCollector collector = pluginManager.getRequestCollectorInstance(plugin, className);
                     collector.setConfiguration(configuration);
                     engine.addCollector(name, collector);
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                } catch ( IllegalArgumentException | SecurityException e) {
                     throw new InitializationException("Could not initialize collector \"" + name + "\": " + e.getMessage(), e);
                 }
             }
@@ -112,39 +110,58 @@ public class YAMLWorkflowEngineProvider {
             Map<String,?> workflowEntry = (Map<String,?>) entry;
             final String name = parseString(workflowEntry, "name", true);
             final String alias = parseString(workflowEntry, "alias", true);
-            final String actionClass = parseString(workflowEntry, "actionClass", true);
-            final String endpointClasses = parseString(workflowEntry, "endpointClasses", false);
             final String description = parseString(workflowEntry, "description", false);
-            final Properties configuration = parseProperties(workflowEntry, "configuration", false);
+
+            final Map<String,?> actionEntry = (Map<String,?>) parseEntry(workflowEntry, "action", true);
+            final List<?> endpointEntries = parseList(workflowEntry, "endpoints", false);
             try {
                 logger.info("Initializing workflow: {}", name);
                 Workflow wf = new Workflow(name, description);
 
-                Class<?> clazz = Class.forName(actionClass);
-                if (!Action.class.isAssignableFrom(clazz)) {
-                    throw new InitializationException("Class " + clazz.getName() + " must implement " + Action.class.getName());
-                }
-                Action action = (Action) clazz.getConstructor().newInstance();
-                action.setConfiguration(configuration);
-                wf.addAction(action);
-
-                for (String endpointClass : (endpointClasses == null || endpointClasses.isEmpty() ? new String[]{} : endpointClasses.split(";"))) {
-                    clazz = Class.forName(endpointClass);
-                    if (!Endpoint.class.isAssignableFrom(clazz)) {
-                        throw new InitializationException("Class " + clazz.getName() + " must implement " + Endpoint.class.getName());
-                    }
-                    Endpoint endpoint = (Endpoint) clazz.getConstructor().newInstance();
-                    endpoint.setConfiguration(configuration);
+                wf.addAction(parseAction(actionEntry));
+                for (Endpoint endpoint : parseEndpoints(endpointEntries)) {
                     wf.addEndpoint(endpoint);
                 }
 
                 engine.addWorkflow(wf, alias.split(" "));
-            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            } catch (SecurityException | IllegalArgumentException e) {
                 throw new InitializationException("Could not initialize workflow \"" + name + "\": " + e.getMessage(), e);
             }
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private List<Endpoint> parseEndpoints(List<?> endpointList) {
+        List<Endpoint> endpoints = new ArrayList<Endpoint>(endpointList.size());
+        for (Object endpoint: endpointList) {
+            endpoints.add(parseEndpoint((Map<String,?>) endpoint));
+        }
+        return endpoints;
+    }
+
+    public Action parseAction(Map<String,?> entry) {
+        final String plugin = parseString(entry, "plugin", false);
+        final String className = parseString(entry, "className", true);
+        final Properties configuration = parseProperties(entry, "configuration", false);
+        Action action = pluginManager.getActionInstance(plugin, className);
+        action.setConfiguration(configuration);
+        return action;
+    }
+
+    public Endpoint parseEndpoint(Map<String,?> entry) {
+        final String plugin = parseString(entry, "plugin", false);
+        final String className = parseString(entry, "className", true);
+        final Properties configuration = parseProperties(entry, "configuration", false);
+        Endpoint endpoint = pluginManager.getEndpointInstance(plugin, className);
+        endpoint.setConfiguration(configuration);
+        return endpoint;
+    }
+
+    /**
+     * TODO: THIS NEEDS TO BE REDONE
+     * @param engine
+     * @param triggers
+     */
     @SuppressWarnings("unchecked")
     private void initializeTriggers(WorkflowEngineImpl engine, List<?> triggers) {
         if (triggers == null) {
@@ -196,7 +213,8 @@ public class YAMLWorkflowEngineProvider {
     }
 
     private List<?> parseList(Map<String,?> map, String key, boolean required) {
-        return (List<?>) parseEntry(map, key, required);
+        List<?> list = (List<?>) parseEntry(map, key, required);
+        return list == null ? new ArrayList<>(0) : list;
     }
 
     private Object parseEntry(Map<String,?> map, String key, boolean required) {

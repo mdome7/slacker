@@ -13,6 +13,8 @@ public class SlackerConfig {
 
     public final static String PARAM_CONFIG = "config";
 
+    public final static String PARAM_PLUGIN_DIR = "pluginDir";
+
     public final static String PARAM_MAX_THREADS = "maxThreads";
 
     /** max number of threads for the entire application */
@@ -20,6 +22,9 @@ public class SlackerConfig {
 
     /** path to config file */
     private Path configFile;
+
+    /** path to plugin directory */
+    private Path pluginDir;
 
     private Properties properties;
 
@@ -30,10 +35,8 @@ public class SlackerConfig {
     public SlackerConfig(Properties properties) {
         this.properties = properties;
         maxThreads = getIntProperty(PARAM_MAX_THREADS, DEFAULT_MAX_THREADS);
-        String configFilePath = getStringProperty(PARAM_CONFIG);
-        if (configFilePath != null) {
-            this.configFile = Paths.get(configFilePath);
-        }
+        configFile = getPathProperty(PARAM_CONFIG);
+        pluginDir = getPathProperty(PARAM_PLUGIN_DIR);
     }
 
     public int getMaxThreads() {
@@ -50,6 +53,22 @@ public class SlackerConfig {
 
     public void setConfigFile(Path configFile) {
         this.configFile = configFile;
+    }
+
+    public Path getPluginDir() {
+        return pluginDir;
+    }
+
+    public void setPluginDir(Path pluginDir) {
+        this.pluginDir = pluginDir;
+    }
+
+    private Path getPathProperty(String key) {
+        String p = getStringProperty(key);
+        if (p != null) {
+            return Paths.get(p);
+        }
+        return null;
     }
 
     private String getStringProperty(String key) {

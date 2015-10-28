@@ -16,8 +16,8 @@ import com.labs2160.slacker.core.engine.WorkflowEngine;
 
 /**
  * Keeps current state of the application.
- * @author mdometita
  *
+ * @author mdometita
  */
 @Named("app")
 @Model
@@ -25,39 +25,39 @@ import com.labs2160.slacker.core.engine.WorkflowEngine;
 @ApplicationScoped
 public class ApplicationManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(ApplicationManager.class);
-	private ApplicationStatus status;
+    private static final Logger logger = LoggerFactory
+            .getLogger(ApplicationManager.class);
+    private ApplicationStatus status;
 
-	private Date startDate;
-	
-	@Inject
-	@Named("engine")
-	private WorkflowEngine engine;
+    private Date startDate;
 
-	@PostConstruct
-	public void initialize() {
-		logger.info("Initializing...");
-		startDate = new Date();
-		status = ApplicationStatus.INTIALIZING;
-		engine.start();
-		status = ApplicationStatus.RUNNING;
-		logger.info("Server initialized!");
-	}
+    @Inject
+    @Named("engine")
+    private WorkflowEngine engine;
 
-	public ApplicationStatus getStatus() {
-		return status;
-	}
+    @PostConstruct
+    public void initialize() {
+        logger.info("Initializing...");
+        startDate = new Date();
+        status = ApplicationStatus.INTIALIZING;
+        engine.start();
+        status = ApplicationStatus.RUNNING;
+        logger.info("Server initialized!");
+    }
 
-	public void setStatus(ApplicationStatus status) {
-		this.status = status;
-	}
+    public ApplicationStatus getStatus() {
+        return status;
+    }
 
-	public Date getStartDate() {
-		return startDate;
-	}
-	
-	public WorkflowEngine getWorkflowEngine() {
-		return engine;
-	}
+    public void setStatus(ApplicationStatus status) {
+        this.status = status;
+    }
 
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public WorkflowEngine getWorkflowEngine() {
+        return engine;
+    }
 }

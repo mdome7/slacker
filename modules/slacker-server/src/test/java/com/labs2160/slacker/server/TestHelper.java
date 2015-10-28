@@ -1,4 +1,4 @@
-package com.labs2160.bob.api.exec;
+package com.labs2160.slacker.server;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
