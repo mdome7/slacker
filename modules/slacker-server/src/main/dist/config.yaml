@@ -7,20 +7,32 @@ collectors:
 workflows:
   - name: Echo
     alias: echo
-    actionClass: com.labs2160.slacker.plugin.extra.EchoAction
+    action:
+      className: com.labs2160.slacker.plugin.extra.EchoAction
 
   - name: Stock
     alias: stock
-    actionClass: com.labs2160.slacker.plugin.extra.MarkitStockAction
+    action:
+      className: com.labs2160.slacker.plugin.extra.MarkitStockAction
 
   - name: Weather
     alias: weather
-    actionClass: com.labs2160.slacker.plugin.extra.yahoo.WeatherAction
+    action:
+      className: com.labs2160.slacker.plugin.extra.yahoo.WeatherAction
 
   - name: Calculator
     alias: calc
-    actionClass: com.labs2160.slacker.plugin.extra.MathAction
+    action:
+      className: com.labs2160.slacker.plugin.extra.MathAction
 
   - name: Random Picker
     alias: pick
-    actionClass: com.labs2160.slacker.plugin.extra.RandomPickerAction
+    action:
+      className: com.labs2160.slacker.plugin.extra.RandomPickerAction
+
+  - name: Static Response to Hey
+    alias: hey
+    action:
+      className: com.labs2160.slacker.plugin.extra.StaticResponseAction
+      configuration:
+        response: "What's up"

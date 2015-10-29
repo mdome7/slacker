@@ -56,7 +56,7 @@ public class YAMLWorkflowEngineProvider {
             WorkflowEngineImpl engine = new WorkflowEngineImpl();
             Map<String,?> configuration = getConfig();
             initializeCollectors(engine, parseList(configuration, "collectors", true));
-            initializeWorkflows(engine, parseList(configuration, "actions", true));
+            initializeWorkflows(engine, parseList(configuration, "workflows", true));
             initializeTriggers(engine, parseList(configuration, "triggers", false));
             logger.debug("Engine initialized in {} ms", System.currentTimeMillis() - start);
             return engine;
