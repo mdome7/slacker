@@ -1,16 +1,16 @@
 package com.labs2160.slacker.core.plugin;
 
-import java.nio.file.Path;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.api.Resource;
 import com.labs2160.slacker.core.InitializationException;
 import com.labs2160.slacker.core.lib.DirClassLoaderRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.file.Path;
+import java.util.Set;
 
 public class PluginManager {
 
@@ -28,6 +28,10 @@ public class PluginManager {
 
     public Set<String> listPlugins() {
         return clRegistry.getClassLoaderDirNames();
+    }
+
+    public Resource getResourceInstance(String pluginName, String className) {
+        return getPluginComponentInstance(pluginName, className, Resource.class);
     }
 
     public RequestCollector getRequestCollectorInstance(String pluginName, String className) {

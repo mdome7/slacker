@@ -1,5 +1,20 @@
 package com.labs2160.slacker.core.config;
 
+import com.labs2160.slacker.api.*;
+import com.labs2160.slacker.core.InitializationException;
+import com.labs2160.slacker.core.engine.Workflow;
+import com.labs2160.slacker.core.engine.WorkflowEngine;
+import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
+import com.labs2160.slacker.core.plugin.PluginManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
@@ -7,26 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.YAMLException;
-
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.Endpoint;
-import com.labs2160.slacker.api.RequestCollector;
-import com.labs2160.slacker.api.Trigger;
-import com.labs2160.slacker.core.InitializationException;
-import com.labs2160.slacker.core.engine.Workflow;
-import com.labs2160.slacker.core.engine.WorkflowEngine;
-import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
-import com.labs2160.slacker.core.plugin.PluginManager;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Initializes the workflow engine from a YAML config file.
@@ -43,6 +39,8 @@ public class YAMLWorkflowEngineProvider {
 
     private final PluginManager pluginManager;
 
+    private Map<String, Resource> resources;
+
     @Inject
     public YAMLWorkflowEngineProvider(SlackerConfig config) {
         this.config = config;
@@ -55,6 +53,7 @@ public class YAMLWorkflowEngineProvider {
             final long start = System.currentTimeMillis();
             WorkflowEngineImpl engine = new WorkflowEngineImpl();
             Map<String,?> configuration = getConfig();
+            resources = provideResources();
             initializeCollectors(engine, parseList(configuration, "collectors", true));
             initializeWorkflows(engine, parseList(configuration, "workflows", true));
             initializeTriggers(engine, parseList(configuration, "triggers", false));
@@ -83,6 +82,27 @@ public class YAMLWorkflowEngineProvider {
         return yamlConfig;
     }
 
+    private Map<String, Resource> provideResources() {
+        Map<String, Resource> resources = new ConcurrentHashMap<>();
+        for (Object entry : parseList(getConfig(), "resources", true)) {
+            Map<String,?> resourceEntry = (Map<String,?>) entry;
+            final String name = parseString(resourceEntry, "name", true);
+            final String plugin = parseString(resourceEntry, "plugin", false);
+            final String className = parseString(resourceEntry, "className", true);
+            final Properties configuration = parseProperties(resourceEntry, "configuration", true);
+            configuration.put("resources", resources);
+            try {
+                Resource resource = pluginManager.getResourceInstance(plugin, className);
+                resource.setConfiguration(configuration);
+                resource.start();
+                resources.put(name, resource);
+            } catch ( IllegalArgumentException | SecurityException e) {
+                throw new InitializationException("Could not initialize resource \"" + name + "\": " + e.getMessage(), e);
+            }
+        }
+        return resources;
+    }
+
     @SuppressWarnings("unchecked")
     private void initializeCollectors(WorkflowEngineImpl engine, List<?> collectors) {
         for (Object entry : collectors) {
@@ -93,6 +113,7 @@ public class YAMLWorkflowEngineProvider {
                 final String plugin = parseString(collectorEntry, "plugin", false);
                 final String className = parseString(collectorEntry, "className", true);
                 final Properties configuration = parseProperties(collectorEntry, "configuration", false);
+                configuration.put("resources", resources);
                 try {
                     RequestCollector collector = pluginManager.getRequestCollectorInstance(plugin, className);
                     collector.setConfiguration(configuration);
@@ -132,7 +153,7 @@ public class YAMLWorkflowEngineProvider {
 
     @SuppressWarnings("unchecked")
     private List<Endpoint> parseEndpoints(List<?> endpointList) {
-        List<Endpoint> endpoints = new ArrayList<Endpoint>(endpointList.size());
+        List<Endpoint> endpoints = new ArrayList<>(endpointList.size());
         for (Object endpoint: endpointList) {
             endpoints.add(parseEndpoint((Map<String,?>) endpoint));
         }
@@ -143,6 +164,7 @@ public class YAMLWorkflowEngineProvider {
         final String plugin = parseString(entry, "plugin", false);
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
+        configuration.put("resources", resources);
         Action action = pluginManager.getActionInstance(plugin, className);
         action.setConfiguration(configuration);
         return action;
@@ -152,6 +174,7 @@ public class YAMLWorkflowEngineProvider {
         final String plugin = parseString(entry, "plugin", false);
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
+        configuration.put("resources", resources);
         Endpoint endpoint = pluginManager.getEndpointInstance(plugin, className);
         endpoint.setConfiguration(configuration);
         return endpoint;
@@ -173,6 +196,7 @@ public class YAMLWorkflowEngineProvider {
             final String name = parseString(triggerEntry, "name", true);
             final String triggerClass = parseString(triggerEntry, "triggerClass", true);
             final Properties configuration = parseProperties(triggerEntry, "configuration", false);
+            configuration.put("resources", resources);
             try {
                 logger.info("Initializing trigger: {}", name);
                 Class<?> clazz = Class.forName(triggerClass);
