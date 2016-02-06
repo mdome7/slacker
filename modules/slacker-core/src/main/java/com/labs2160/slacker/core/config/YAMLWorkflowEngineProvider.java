@@ -53,7 +53,7 @@ public class YAMLWorkflowEngineProvider {
             final long start = System.currentTimeMillis();
             WorkflowEngineImpl engine = new WorkflowEngineImpl();
             Map<String,?> configuration = getConfig();
-            resources = provideResources();
+            resources = provideResources(configuration);
             initializeCollectors(engine, parseList(configuration, "collectors", true));
             initializeWorkflows(engine, parseList(configuration, "workflows", true));
             initializeTriggers(engine, parseList(configuration, "triggers", false));
@@ -82,18 +82,18 @@ public class YAMLWorkflowEngineProvider {
         return yamlConfig;
     }
 
-    private Map<String, Resource> provideResources() {
+    private Map<String, Resource> provideResources(Map<String,?>  configuration) {
         Map<String, Resource> resources = new ConcurrentHashMap<>();
-        for (Object entry : parseList(getConfig(), "resources", true)) {
+        for (Object entry : parseList(configuration, "resources", false)) {
             Map<String,?> resourceEntry = (Map<String,?>) entry;
             final String name = parseString(resourceEntry, "name", true);
             final String plugin = parseString(resourceEntry, "plugin", false);
             final String className = parseString(resourceEntry, "className", true);
-            final Properties configuration = parseProperties(resourceEntry, "configuration", true);
-            configuration.put("resources", resources);
+            final Properties resourceConfig = parseProperties(resourceEntry, "configuration", true);
+            resourceConfig.put("resources", resources);
             try {
                 Resource resource = pluginManager.getResourceInstance(plugin, className);
-                resource.setConfiguration(configuration);
+                resource.setConfiguration(resourceConfig);
                 resource.start();
                 resources.put(name, resource);
             } catch ( IllegalArgumentException | SecurityException e) {
