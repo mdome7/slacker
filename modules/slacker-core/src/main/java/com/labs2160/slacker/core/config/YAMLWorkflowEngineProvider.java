@@ -53,7 +53,7 @@ public class YAMLWorkflowEngineProvider {
             final long start = System.currentTimeMillis();
             WorkflowEngineImpl engine = new WorkflowEngineImpl();
             Map<String,?> configuration = getConfig();
-            resources = provideResources(configuration);
+            resources = provideResources(parseList(configuration, "resources", false));
             initializeCollectors(engine, parseList(configuration, "collectors", true));
             initializeWorkflows(engine, parseList(configuration, "workflows", true));
             initializeTriggers(engine, parseList(configuration, "triggers", false));
@@ -82,19 +82,17 @@ public class YAMLWorkflowEngineProvider {
         return yamlConfig;
     }
 
-    private Map<String, Resource> provideResources(Map<String,?>  configuration) {
+    public Map<String, Resource> provideResources(List<?> resourceList) {
         Map<String, Resource> resources = new ConcurrentHashMap<>();
-        for (Object entry : parseList(configuration, "resources", false)) {
+        for (Object entry : resourceList) {
             Map<String,?> resourceEntry = (Map<String,?>) entry;
             final String name = parseString(resourceEntry, "name", true);
             final String plugin = parseString(resourceEntry, "plugin", false);
             final String className = parseString(resourceEntry, "className", true);
-            final Properties resourceConfig = parseProperties(resourceEntry, "configuration", true);
-            resourceConfig.put("resources", resources);
+            final Properties configuration = parseProperties(resourceEntry, "configuration", true);
             try {
                 Resource resource = pluginManager.getResourceInstance(plugin, className);
-                resource.setConfiguration(resourceConfig);
-                resource.start();
+                resource.setConfiguration(configuration);
                 resources.put(name, resource);
             } catch ( IllegalArgumentException | SecurityException e) {
                 throw new InitializationException("Could not initialize resource \"" + name + "\": " + e.getMessage(), e);
@@ -113,10 +111,9 @@ public class YAMLWorkflowEngineProvider {
                 final String plugin = parseString(collectorEntry, "plugin", false);
                 final String className = parseString(collectorEntry, "className", true);
                 final Properties configuration = parseProperties(collectorEntry, "configuration", false);
-                configuration.put("resources", resources);
                 try {
                     RequestCollector collector = pluginManager.getRequestCollectorInstance(plugin, className);
-                    collector.setConfiguration(configuration);
+                    collector.setConfiguration(resources, configuration);
                     engine.addCollector(name, collector);
                 } catch ( IllegalArgumentException | SecurityException e) {
                     throw new InitializationException("Could not initialize collector \"" + name + "\": " + e.getMessage(), e);
@@ -164,9 +161,8 @@ public class YAMLWorkflowEngineProvider {
         final String plugin = parseString(entry, "plugin", false);
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
-        configuration.put("resources", resources);
         Action action = pluginManager.getActionInstance(plugin, className);
-        action.setConfiguration(configuration);
+        action.setConfiguration(resources, configuration);
         return action;
     }
 
@@ -174,9 +170,8 @@ public class YAMLWorkflowEngineProvider {
         final String plugin = parseString(entry, "plugin", false);
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
-        configuration.put("resources", resources);
         Endpoint endpoint = pluginManager.getEndpointInstance(plugin, className);
-        endpoint.setConfiguration(configuration);
+        endpoint.setConfiguration(resources, configuration);
         return endpoint;
     }
 
@@ -196,7 +191,6 @@ public class YAMLWorkflowEngineProvider {
             final String name = parseString(triggerEntry, "name", true);
             final String triggerClass = parseString(triggerEntry, "triggerClass", true);
             final Properties configuration = parseProperties(triggerEntry, "configuration", false);
-            configuration.put("resources", resources);
             try {
                 logger.info("Initializing trigger: {}", name);
                 Class<?> clazz = Class.forName(triggerClass);
@@ -204,7 +198,7 @@ public class YAMLWorkflowEngineProvider {
                     throw new InitializationException("Class " + clazz.getName() + " must implement " + Trigger.class.getName());
                 }
                 Trigger trigger = (Trigger) clazz.getConstructor().newInstance();
-                trigger.setConfiguration(configuration);
+                trigger.setConfiguration(resources, configuration);
                 engine.addTrigger(name, trigger);
             } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new InitializationException("Could not initialize trigger \"" + name + "\": " + e.getMessage(), e);

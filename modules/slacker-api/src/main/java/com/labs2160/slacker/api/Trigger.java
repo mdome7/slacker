@@ -8,4 +8,10 @@ public interface Trigger extends Configurable {
 	 */
 	void start(RequestHandler handler);
 
+	/**
+	 * Get SchedulerTasks that should be managed and run by the engine.
+	 * @return
+	 */
+	SchedulerTask [] getSchedulerTasks();
+
 }

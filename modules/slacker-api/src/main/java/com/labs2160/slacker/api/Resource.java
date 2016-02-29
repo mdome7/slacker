@@ -5,7 +5,7 @@ package com.labs2160.slacker.api;
  *
  * Examples: XMPP chat server, IMAP email client, SQL database connection
  */
-public interface Resource extends Configurable {
+public interface Resource extends ConfigurableRaw {
 
     void start();
     void shutdown();

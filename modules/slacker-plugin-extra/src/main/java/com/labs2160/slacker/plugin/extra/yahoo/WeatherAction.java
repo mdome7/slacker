@@ -1,23 +1,19 @@
 package com.labs2160.slacker.plugin.extra.yahoo;
 
-import java.io.IOException;
-import java.util.Properties;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.labs2160.slacker.api.*;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.SlackerContext;
-import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.annotation.ActionDescription;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Arguments: zip_code -
@@ -41,7 +37,7 @@ public class WeatherAction implements Action {
     }
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         // do nothing
     }
 

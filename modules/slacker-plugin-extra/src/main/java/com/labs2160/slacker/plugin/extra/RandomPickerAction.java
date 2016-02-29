@@ -1,18 +1,11 @@
 package com.labs2160.slacker.plugin.extra;
 
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
+import com.labs2160.slacker.api.*;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 import jersey.repackaged.com.google.common.collect.Lists;
 
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.InvalidRequestException;
-import com.labs2160.slacker.api.SlackerContext;
-import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.annotation.ActionDescription;
+import java.security.SecureRandom;
+import java.util.*;
 
 @ActionDescription(
         name = "Random Picker",
@@ -26,7 +19,7 @@ public class RandomPickerAction implements Action {
     private static final SecureRandom RANDOM = new SecureRandom(Long.toString(System.currentTimeMillis()).getBytes());
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         // do nothing
     }
 

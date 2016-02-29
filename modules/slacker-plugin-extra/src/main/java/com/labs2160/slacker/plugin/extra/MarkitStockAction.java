@@ -1,21 +1,17 @@
 package com.labs2160.slacker.plugin.extra;
 
-import java.util.Properties;
+import com.labs2160.slacker.api.*;
+import com.labs2160.slacker.api.annotation.ActionDescription;
+import org.glassfish.jersey.client.ClientConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-
-import org.glassfish.jersey.client.ClientConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.SlackerContext;
-import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.annotation.ActionDescription;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * {
@@ -53,7 +49,7 @@ public class MarkitStockAction implements Action {
     }
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         // do nothing
     }
 

@@ -1,40 +1,17 @@
 package com.labs2160.slacker.core.engine;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.Endpoint;
-import com.labs2160.slacker.api.Trigger;
-import com.labs2160.slacker.api.InvalidRequestException;
-import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.RequestCollector;
-import com.labs2160.slacker.api.ScheduledJob;
-import com.labs2160.slacker.api.SlackerContext;
-import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.SlackerRequest;
-import com.labs2160.slacker.api.SlackerResponse;
+import com.labs2160.slacker.api.*;
 import com.labs2160.slacker.core.event.WorkflowExecutionEvent;
 import com.labs2160.slacker.core.event.WorkflowExecutionEventType;
 import com.labs2160.slacker.core.event.WorkflowExecutionListener;
 import com.labs2160.slacker.core.util.UUIDUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class WorkflowEngineImpl implements WorkflowEngine {
 
@@ -42,10 +19,8 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     private final static Logger logger = LoggerFactory.getLogger(WorkflowEngineImpl.class);
 
-    private final static long INITIAL_SCHEDULE_DELAY_SEC = 10;
-
     /** scheduler for jobs */
-    private ScheduledExecutorService scheduler;
+    private EngineScheduler scheduler;
 
     /** main executor service */
     private ExecutorService executorService;
@@ -73,8 +48,8 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         long start = System.currentTimeMillis();
         logger.debug("Starting engine...");
 
-        executorService = Executors.newFixedThreadPool(5);// TODO: parameterize
-        scheduler = Executors.newScheduledThreadPool(1);
+        executorService = Executors.newFixedThreadPool(5); // TODO: parameterize
+        scheduler = new EngineScheduler();
 
         for (String collectorName : collectors.keySet()) {
             try {
@@ -82,13 +57,11 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 RequestCollector collector = collectors.get(collectorName);
                 collector.start(this);
 
-                ScheduledJob [] jobs = collector.getScheduledJobs();
-                if (jobs != null) {
-                    for (ScheduledJob job : jobs) {
-                        logger.debug("Scheduling job for {} with period of {} s", collectorName, job.getPeriod());
-                        ScheduledFuture<?> jobFuture = scheduler.scheduleAtFixedRate(
-                                job, INITIAL_SCHEDULE_DELAY_SEC, job.getPeriod(), TimeUnit.SECONDS);
-                        // TODO: keep track of jobFutures per collector if we want collectors to be shutdown at runtime
+                SchedulerTask [] tasks = collector.getSchedulerTasks();
+                if (tasks != null) {
+                    for (SchedulerTask task : tasks) {
+                        String taskId = scheduler.schedule(task);
+                        logger.debug("Scheduling task {} for {}", taskId, collectorName);
                     }
                 }
 
@@ -99,9 +72,22 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         }
 
         for (String triggerName : triggers.keySet()) {
-            logger.debug("Starting trigger: {}", triggerName);
-            Trigger trigger = triggers.get(triggerName);
-            trigger.start(this);
+            try {
+                logger.debug("Starting trigger: {}", triggerName);
+                Trigger trigger = triggers.get(triggerName);
+                trigger.start(this);
+
+                SchedulerTask [] tasks = trigger.getSchedulerTasks();
+                if (tasks != null) {
+                    for (SchedulerTask task : tasks) {
+                        String taskId = scheduler.schedule(task);
+                        logger.debug("Scheduling task {} for {}", taskId, triggerName);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Could not start trigger {} due to error.", triggerName, e);
+                logger.warn("Skipping trigger {} but will continue startup.", triggerName);
+            }
         }
         logger.info("Engine started in {} ms", System.currentTimeMillis() - start);
     }
@@ -137,18 +123,18 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     }
 
     @Override
-    public Future<SlackerResponse> handle(final SlackerRequest request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException {
+    public Future<SlackerResponse> handle(final SlackerRequest request) throws SlackerException {
         return this.executorService.submit(new Callable<SlackerResponse>() {
             @Override
             public SlackerResponse call() throws Exception {
-                SlackerContext ctx = handleHelp(request);
-                if (ctx != null) {
-                    return convertToImmutableResponse(ctx.getResponse());
-                } else {
-                    final WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
-                    logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
-                    return executeWorkflow(wfr);
-                }
+            SlackerContext ctx = handleHelp(request);
+            if (ctx != null) {
+                return convertToImmutableResponse(ctx.getResponse());
+            } else {
+                final WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
+                logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
+                return executeWorkflow(wfr);
+            }
             }
         });
     }

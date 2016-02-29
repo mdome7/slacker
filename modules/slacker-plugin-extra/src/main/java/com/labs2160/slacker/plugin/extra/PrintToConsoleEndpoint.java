@@ -1,10 +1,12 @@
 package com.labs2160.slacker.plugin.extra;
 
-import java.util.Properties;
-
 import com.labs2160.slacker.api.Endpoint;
-import com.labs2160.slacker.api.SlackerResponse;
+import com.labs2160.slacker.api.Resource;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.SlackerResponse;
+
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Used for debugging
@@ -12,7 +14,7 @@ import com.labs2160.slacker.api.SlackerException;
 public class PrintToConsoleEndpoint implements Endpoint {
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         // do nothing
     }
 
