@@ -1,16 +1,17 @@
 package com.labs2160.slacker.plugin.rs;
 
-import java.util.Properties;
-
+import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.api.RequestHandler;
+import com.labs2160.slacker.api.Resource;
+import com.labs2160.slacker.api.SchedulerTask;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.labs2160.slacker.api.RequestCollector;
-import com.labs2160.slacker.api.RequestHandler;
-import com.labs2160.slacker.api.ScheduledJob;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Collector that exposes a REST endpoint for requests.
@@ -81,13 +82,13 @@ public class RESTCollector implements RequestCollector {
     }
 
     @Override
-    public ScheduledJob[] getScheduledJobs() {
+    public SchedulerTask[] getSchedulerTasks() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         String portString = config.getProperty(CONFIG_PORT, "" + DEFAULT_PORT);
         this.port = Integer.parseInt(portString);
     }

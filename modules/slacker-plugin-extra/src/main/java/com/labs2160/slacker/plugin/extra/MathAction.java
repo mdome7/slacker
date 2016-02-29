@@ -1,15 +1,12 @@
 package com.labs2160.slacker.plugin.extra;
 
-import java.util.Properties;
-
+import com.labs2160.slacker.api.*;
+import com.labs2160.slacker.api.annotation.ActionDescription;
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
 
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.NoArgumentsFoundException;
-import com.labs2160.slacker.api.SlackerContext;
-import com.labs2160.slacker.api.SlackerException;
-import com.labs2160.slacker.api.annotation.ActionDescription;
+import java.util.Map;
+import java.util.Properties;
 
 @ActionDescription(
         name = "Calculator",
@@ -26,7 +23,7 @@ public class MathAction implements Action {
     }
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         // do nothing
     }
 

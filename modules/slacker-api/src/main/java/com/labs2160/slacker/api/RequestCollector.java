@@ -20,8 +20,8 @@ public interface RequestCollector extends Configurable {
 	boolean isActive();
 
 	/**
-	 * Get ScheduledJobs that should be managed and run by the engine.
+	 * Get SchedulerTasks that should be managed and run by the engine.
 	 * @return
 	 */
-	ScheduledJob [] getScheduledJobs();
+	SchedulerTask [] getSchedulerTasks();
 }

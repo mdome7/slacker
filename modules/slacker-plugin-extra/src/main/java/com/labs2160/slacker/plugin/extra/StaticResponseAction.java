@@ -1,11 +1,13 @@
 package com.labs2160.slacker.plugin.extra;
 
-import java.util.Properties;
-
 import com.labs2160.slacker.api.Action;
+import com.labs2160.slacker.api.Resource;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.annotation.ActionDescription;
+
+import java.util.Map;
+import java.util.Properties;
 
 @ActionDescription(
         name = "Broken Record",
@@ -16,7 +18,7 @@ public class StaticResponseAction implements Action {
     private String response = "<no response configured>";
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         response = config.getProperty("response");
     }
 

@@ -1,34 +1,37 @@
 package com.labs2160.slacker.plugin.extra;
 
-import com.labs2160.slacker.api.RequestHandler;
-import com.labs2160.slacker.api.SlackerRequest;
-import com.labs2160.slacker.api.SlackerResponse;
-import com.labs2160.slacker.api.Trigger;
-import it.sauronsoftware.cron4j.Scheduler;
+import com.labs2160.slacker.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
-public class ScheduleTrigger implements Trigger {
+public class SchedulerTrigger implements Trigger {
 
     private static final Logger logger = LoggerFactory.getLogger(Trigger.class);
-    private static final Scheduler scheduler = new Scheduler();
 
     private String schedulingPattern;
     private String request;
+    private RequestHandler handler;
 
     @Override
-    public void setConfiguration(Properties config) {
+    public void setConfiguration(Map<String, Resource> resources, Properties config) {
         this.schedulingPattern = config.getProperty("schedulingPattern");
         this.request = config.getProperty("request");
     }
 
     @Override
     public void start(final RequestHandler handler) {
-        scheduler.schedule(schedulingPattern, new Runnable() {
-            public void run() {
+        this.handler = handler;
+    }
+
+    @Override
+    public SchedulerTask[] getSchedulerTasks() {
+        SchedulerTask configRequest = new SchedulerTask(schedulingPattern) {
+            @Override
+            public void execute() {
                 logger.info("Trigger breakpoint reached. Processing request '{}' now.", request);
                 try {
                     String[] tokens = request.split(" ");
@@ -40,7 +43,7 @@ public class ScheduleTrigger implements Trigger {
                     logger.error("Could not process request '{}' due to error {}.", request, e);
                 }
             }
-        });
-        scheduler.start();
+        };
+        return new SchedulerTask[] { configRequest };
     }
 }
