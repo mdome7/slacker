@@ -113,7 +113,7 @@ public class YAMLWorkflowEngineProvider {
                 final Properties configuration = parseProperties(collectorEntry, "configuration", false);
                 try {
                     RequestCollector collector = pluginManager.getRequestCollectorInstance(plugin, className);
-                    collector.setConfiguration(resources, configuration);
+                    collector.setComponents(resources, configuration);
                     engine.addCollector(name, collector);
                 } catch ( IllegalArgumentException | SecurityException e) {
                     throw new InitializationException("Could not initialize collector \"" + name + "\": " + e.getMessage(), e);
@@ -162,7 +162,7 @@ public class YAMLWorkflowEngineProvider {
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
         Action action = pluginManager.getActionInstance(plugin, className);
-        action.setConfiguration(resources, configuration);
+        action.setComponents(resources, configuration);
         return action;
     }
 
@@ -171,7 +171,7 @@ public class YAMLWorkflowEngineProvider {
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
         Endpoint endpoint = pluginManager.getEndpointInstance(plugin, className);
-        endpoint.setConfiguration(resources, configuration);
+        endpoint.setComponents(resources, configuration);
         return endpoint;
     }
 
@@ -198,7 +198,7 @@ public class YAMLWorkflowEngineProvider {
                     throw new InitializationException("Class " + clazz.getName() + " must implement " + Trigger.class.getName());
                 }
                 Trigger trigger = (Trigger) clazz.getConstructor().newInstance();
-                trigger.setConfiguration(resources, configuration);
+                trigger.setComponents(resources, configuration);
                 engine.addTrigger(name, trigger);
             } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new InitializationException("Could not initialize trigger \"" + name + "\": " + e.getMessage(), e);

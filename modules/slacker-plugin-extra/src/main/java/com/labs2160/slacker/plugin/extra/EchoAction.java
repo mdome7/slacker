@@ -18,7 +18,7 @@ import java.util.Properties;
 public class EchoAction implements Action {
 
     @Override
-    public void setConfiguration(Map<String, Resource> resources, Properties config) {
+    public void setComponents(Map<String, Resource> resources, Properties config) {
         // do nothing
     }
 

@@ -1,6 +1,6 @@
 package com.labs2160.slacker.api;
 
-public interface Trigger extends Configurable {
+public interface Trigger extends WorkflowComponent {
 
 	/**
 	 * Start the trigger

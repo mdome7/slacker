@@ -7,7 +7,7 @@ package com.labs2160.slacker.api;
  * @author mike
  *
  */
-public interface RequestCollector extends Configurable {
+public interface RequestCollector extends WorkflowComponent {
 
 	/**
 	 * Start the collector.

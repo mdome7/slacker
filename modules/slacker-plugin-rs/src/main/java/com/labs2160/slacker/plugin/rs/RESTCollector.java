@@ -88,7 +88,7 @@ public class RESTCollector implements RequestCollector {
     }
 
     @Override
-    public void setConfiguration(Map<String, Resource> resources, Properties config) {
+    public void setComponents(Map<String, Resource> resources, Properties config) {
         String portString = config.getProperty(CONFIG_PORT, "" + DEFAULT_PORT);
         this.port = Integer.parseInt(portString);
     }

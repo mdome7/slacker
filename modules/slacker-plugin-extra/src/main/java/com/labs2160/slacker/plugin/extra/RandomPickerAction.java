@@ -19,7 +19,7 @@ public class RandomPickerAction implements Action {
     private static final SecureRandom RANDOM = new SecureRandom(Long.toString(System.currentTimeMillis()).getBytes());
 
     @Override
-    public void setConfiguration(Map<String, Resource> resources, Properties config) {
+    public void setComponents(Map<String, Resource> resources, Properties config) {
         // do nothing
     }
 
