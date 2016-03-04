@@ -60,8 +60,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 SchedulerTask [] tasks = collector.getSchedulerTasks();
                 if (tasks != null) {
                     for (SchedulerTask task : tasks) {
-                        String taskId = scheduler.schedule(task);
-                        logger.debug("Scheduling task {} for {}", taskId, collectorName);
+                        scheduler.schedule(task);
                     }
                 }
 
@@ -80,8 +79,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 SchedulerTask [] tasks = trigger.getSchedulerTasks();
                 if (tasks != null) {
                     for (SchedulerTask task : tasks) {
-                        String taskId = scheduler.schedule(task);
-                        logger.debug("Scheduling task {} for {}", taskId, triggerName);
+                        scheduler.schedule(task);
                     }
                 }
             } catch (Exception e) {
@@ -127,14 +125,14 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         return this.executorService.submit(new Callable<SlackerResponse>() {
             @Override
             public SlackerResponse call() throws Exception {
-            SlackerContext ctx = handleHelp(request);
-            if (ctx != null) {
-                return convertToImmutableResponse(ctx.getResponse());
-            } else {
-                final WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
-                logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
-                return executeWorkflow(wfr);
-            }
+                SlackerContext ctx = handleHelp(request);
+                if (ctx != null) {
+                    return convertToImmutableResponse(ctx.getResponse());
+                } else {
+                    final WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
+                    logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
+                    return executeWorkflow(wfr);
+                }
             }
         });
     }

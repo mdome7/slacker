@@ -18,7 +18,7 @@ public class StaticResponseAction implements Action {
     private String response = "<no response configured>";
 
     @Override
-    public void setConfiguration(Map<String, Resource> resources, Properties config) {
+    public void setComponents(Map<String, Resource> resources, Properties config) {
         response = config.getProperty("response");
     }
 

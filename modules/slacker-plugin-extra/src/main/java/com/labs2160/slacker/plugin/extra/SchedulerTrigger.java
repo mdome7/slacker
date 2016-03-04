@@ -17,7 +17,7 @@ public class SchedulerTrigger implements Trigger {
     private RequestHandler handler;
 
     @Override
-    public void setConfiguration(Map<String, Resource> resources, Properties config) {
+    public void setComponents(Map<String, Resource> resources, Properties config) {
         this.schedulingPattern = config.getProperty("schedulingPattern");
         this.request = config.getProperty("request");
     }

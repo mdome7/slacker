@@ -1,6 +1,6 @@
 package com.labs2160.slacker.api;
 
-public interface Endpoint extends Configurable {
+public interface Endpoint extends WorkflowComponent {
 
 	/**
 	 * Deliver the action's response to the endpoint

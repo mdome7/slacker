@@ -1,6 +1,6 @@
 package com.labs2160.slacker.api;
 
-public interface Action extends Configurable {
+public interface Action extends WorkflowComponent {
 
 	/**
 	 * Execute the action
