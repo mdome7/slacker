@@ -87,6 +87,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
                 logger.warn("Skipping trigger {} but will continue startup.", triggerName);
             }
         }
+        scheduler.start();
         logger.info("Engine started in {} ms", System.currentTimeMillis() - start);
     }
 
