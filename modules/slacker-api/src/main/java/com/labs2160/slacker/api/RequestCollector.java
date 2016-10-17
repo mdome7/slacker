@@ -7,21 +7,21 @@ package com.labs2160.slacker.api;
  * @author mike
  *
  */
-public interface RequestCollector {
+public interface RequestCollector extends WorkflowComponent {
 
 	/**
 	 * Start the collector.
 	 * @param handler used for processing any requests this collector may generate
 	 */
 	void start(RequestHandler handler);
-	
+
 	void shutdown();
-	
+
 	boolean isActive();
 
 	/**
-	 * Get ScheduledJobs that should be managed and run by the engine.
+	 * Get SchedulerTasks that should be managed and run by the engine.
 	 * @return
 	 */
-	ScheduledJob [] getScheduledJobs();
+	SchedulerTask [] getSchedulerTasks();
 }

@@ -1,0 +1,38 @@
+collectors:
+  - name: REST API
+    className: com.labs2160.slacker.plugin.rs.RESTCollector
+    configuration:
+      port: 7000
+
+workflows:
+  - name: Echo
+    alias: echo
+    action:
+      className: com.labs2160.slacker.plugin.extra.EchoAction
+
+  - name: Stock
+    alias: stock
+    action:
+      className: com.labs2160.slacker.plugin.extra.MarkitStockAction
+
+  - name: Weather
+    alias: weather
+    action:
+      className: com.labs2160.slacker.plugin.extra.yahoo.WeatherAction
+
+  - name: Calculator
+    alias: calc
+    action:
+      className: com.labs2160.slacker.plugin.extra.MathAction
+
+  - name: Random Picker
+    alias: pick
+    action:
+      className: com.labs2160.slacker.plugin.extra.RandomPickerAction
+
+  - name: Static Response to Hey
+    alias: hey
+    action:
+      className: com.labs2160.slacker.plugin.extra.StaticResponseAction
+      configuration:
+        response: "What's up"
