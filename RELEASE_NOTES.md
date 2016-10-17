@@ -1,5 +1,9 @@
 # Releases
 
+## v1.4
+* Cleaned up interfaces
+* Cleaner config structure and reusable variables
+
 ## v1.2
 * Improved plugin management and class loading
 
