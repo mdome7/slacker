@@ -13,15 +13,10 @@ import java.util.*;
         argsSpec = "<N: number of values to pick> <value 1> <value 2> ... <value N>",
         argsExample = "2 Peter Lois Stewey Meg Chris"
 )
-public class RandomPickerAction implements Action {
+public class RandomPickerAction extends SimpleAbstractAction {
 
     /** randomizer */
     private static final SecureRandom RANDOM = new SecureRandom(Long.toString(System.currentTimeMillis()).getBytes());
-
-    @Override
-    public void setComponents(Map<String, Resource> resources, Properties config) {
-        // do nothing
-    }
 
     @Override
     public boolean execute(SlackerContext ctx) throws SlackerException {
@@ -30,16 +25,21 @@ public class RandomPickerAction implements Action {
             if (args.length < 3) {
                 throw new InvalidRequestException("At least 3 arguments required - number of items to pick and at least 2 item choices");
             }
-            int num = Integer.parseInt(args[0]);
-            if (num <= 0) {
-                throw new InvalidRequestException("Number of items to pick must be greater than 0 but was " + num);
+            int toPick = Integer.parseInt(args[0]);
+            if (toPick <= 0) {
+                throw new InvalidRequestException("Number of items to pick must be greater than 0 but was " + toPick);
             } else {
-                List<String> choices = new LinkedList<>(Lists.newArrayList(Arrays.copyOfRange(args, 1, args.length)));
-                num = Math.min(num, choices.size());
-                String [] picked = new String[num];
+                String [] choices = Arrays.copyOfRange(args, 1, args.length);
+                toPick = Math.min(toPick, choices.length);
+
+                String [] picked = new String[toPick];
                 do {
-                    picked[--num] = choices.remove(RANDOM.nextInt(choices.size()));
-                } while (num > 0);
+                    int p = RANDOM.nextInt(toPick);
+                    picked[--toPick] = choices[p];
+                    if (p < toPick) {
+                        choices[p] = choices[toPick];
+                    }
+                } while (toPick > 0);
                 ctx.setResponseMessage(join(picked));
             }
             return true;

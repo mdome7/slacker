@@ -1,9 +1,6 @@
 package com.labs2160.slacker.plugin.rs;
 
-import com.labs2160.slacker.api.RequestCollector;
-import com.labs2160.slacker.api.RequestHandler;
-import com.labs2160.slacker.api.Resource;
-import com.labs2160.slacker.api.SchedulerTask;
+import com.labs2160.slacker.api.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -88,7 +85,7 @@ public class RESTCollector implements RequestCollector {
     }
 
     @Override
-    public void setComponents(Map<String, Resource> resources, Properties config) {
+    public void setComponents(Map<String, Resource> resources, Properties config) throws InitializationException {
         String portString = config.getProperty(CONFIG_PORT, "" + DEFAULT_PORT);
         this.port = Integer.parseInt(portString);
     }

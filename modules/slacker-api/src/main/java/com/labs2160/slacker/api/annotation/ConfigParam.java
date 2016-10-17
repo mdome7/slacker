@@ -8,5 +8,8 @@ import java.lang.annotation.Target;
 public @interface ConfigParam {
     String key();
     String description();
-    String example();
+
+    boolean required() default false;
+    String defaultValue() default "";
+    String example() default "";
 }

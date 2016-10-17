@@ -1,7 +1,7 @@
 package com.labs2160.slacker.core.config;
 
 import com.labs2160.slacker.api.*;
-import com.labs2160.slacker.core.InitializationException;
+import com.labs2160.slacker.api.InitializationException;
 import com.labs2160.slacker.core.engine.Workflow;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
@@ -48,7 +48,7 @@ public class YAMLWorkflowEngineProvider {
     }
 
     @Produces @ApplicationScoped @Named("engine")
-    public WorkflowEngine provide() {
+    public WorkflowEngine provide() throws InitializationException {
         try {
             final long start = System.currentTimeMillis();
             WorkflowEngineImpl engine = new WorkflowEngineImpl();
@@ -59,15 +59,13 @@ public class YAMLWorkflowEngineProvider {
             initializeTriggers(engine, parseList(configuration, "triggers", false));
             logger.debug("Engine initialized in {} ms", System.currentTimeMillis() - start);
             return engine;
-        } catch (InitializationException e) {
-            throw e;
         } catch (Exception e) {
             throw new InitializationException("Error while initializing engine: " + e.getMessage(), e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String,?> getConfig() {
+    private Map<String,?> getConfig() throws InitializationException {
         Map<String,?> yamlConfig = null;
         try {
             if (config.getConfigFile() != null) {
@@ -82,7 +80,7 @@ public class YAMLWorkflowEngineProvider {
         return yamlConfig;
     }
 
-    public Map<String, Resource> provideResources(List<?> resourceList) {
+    public Map<String, Resource> provideResources(List<?> resourceList) throws InitializationException {
         Map<String, Resource> resources = new ConcurrentHashMap<>();
         for (Object entry : resourceList) {
             Map<String,?> resourceEntry = (Map<String,?>) entry;
@@ -102,7 +100,7 @@ public class YAMLWorkflowEngineProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private void initializeCollectors(WorkflowEngineImpl engine, List<?> collectors) {
+    private void initializeCollectors(WorkflowEngineImpl engine, List<?> collectors) throws InitializationException {
         for (Object entry : collectors) {
             Map<String,?> collectorEntry = (Map<String,?>) entry;
             final Boolean enabled = parseBoolean(collectorEntry, "enabled", false);
@@ -123,7 +121,7 @@ public class YAMLWorkflowEngineProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private void initializeWorkflows(WorkflowEngineImpl engine, List<?> workflows) {
+    private void initializeWorkflows(WorkflowEngineImpl engine, List<?> workflows) throws InitializationException {
         for (Object entry : workflows) {
             Map<String,?> workflowEntry = (Map<String,?>) entry;
             final String name = parseString(workflowEntry, "name", true);
@@ -149,7 +147,7 @@ public class YAMLWorkflowEngineProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private List<Endpoint> parseEndpoints(List<?> endpointList) {
+    private List<Endpoint> parseEndpoints(List<?> endpointList) throws InitializationException {
         List<Endpoint> endpoints = new ArrayList<>(endpointList.size());
         for (Object endpoint: endpointList) {
             endpoints.add(parseEndpoint((Map<String,?>) endpoint));
@@ -157,7 +155,7 @@ public class YAMLWorkflowEngineProvider {
         return endpoints;
     }
 
-    public Action parseAction(Map<String,?> entry) {
+    public Action parseAction(Map<String,?> entry) throws InitializationException {
         final String plugin = parseString(entry, "plugin", false);
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
@@ -166,7 +164,7 @@ public class YAMLWorkflowEngineProvider {
         return action;
     }
 
-    public Endpoint parseEndpoint(Map<String,?> entry) {
+    public Endpoint parseEndpoint(Map<String,?> entry) throws InitializationException {
         final String plugin = parseString(entry, "plugin", false);
         final String className = parseString(entry, "className", true);
         final Properties configuration = parseProperties(entry, "configuration", false);
@@ -181,7 +179,7 @@ public class YAMLWorkflowEngineProvider {
      * @param triggers
      */
     @SuppressWarnings("unchecked")
-    private void initializeTriggers(WorkflowEngineImpl engine, List<?> triggers) {
+    private void initializeTriggers(WorkflowEngineImpl engine, List<?> triggers) throws InitializationException {
         if (triggers == null) {
             // No triggers in config
             return;
@@ -206,11 +204,11 @@ public class YAMLWorkflowEngineProvider {
         }
     }
 
-    private Boolean parseBoolean(Map<String,?> map, String key, boolean required) {
+    private Boolean parseBoolean(Map<String,?> map, String key, boolean required) throws InitializationException {
         return (Boolean) parseEntry(map, key, required);
     }
 
-    private String parseString(Map<String,?> map, String key, boolean required) {
+    private String parseString(Map<String,?> map, String key, boolean required) throws InitializationException {
         String value = (String) parseEntry(map, key, required);
         if (required && value.trim().isEmpty()) {
             throw new InitializationException("Missing required parameter \"" + key + "\"");
@@ -219,7 +217,7 @@ public class YAMLWorkflowEngineProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private Properties parseProperties(Map<String,?> map, String key, boolean required) {
+    private Properties parseProperties(Map<String,?> map, String key, boolean required) throws InitializationException {
         Properties config = new Properties();
         Map<String,?> configMap = (Map<String,?>) parseEntry(map, key, required);
         if (configMap != null) {
@@ -230,12 +228,12 @@ public class YAMLWorkflowEngineProvider {
         return config;
     }
 
-    private List<?> parseList(Map<String,?> map, String key, boolean required) {
+    private List<?> parseList(Map<String,?> map, String key, boolean required) throws InitializationException {
         List<?> list = (List<?>) parseEntry(map, key, required);
         return list == null ? new ArrayList<>(0) : list;
     }
 
-    private Object parseEntry(Map<String,?> map, String key, boolean required) {
+    private Object parseEntry(Map<String,?> map, String key, boolean required) throws InitializationException {
         Object val = map.get(key);
         if (required && val == null) {
             throw new InitializationException("Missing required parameter \"" + key + "\"");

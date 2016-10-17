@@ -25,7 +25,7 @@ import java.util.Properties;
         argsSpec = "<city or zip code>",
         argsExample = "Seattle, WA"
 )
-public class WeatherAction implements Action {
+public class WeatherAction extends SimpleAbstractAction {
 
     private static Logger logger = LoggerFactory.getLogger(WeatherAction.class);
 
@@ -34,11 +34,6 @@ public class WeatherAction implements Action {
     public WeatherAction() {
         Client client = ClientBuilder.newClient(new ClientConfig());
         target = client.target("https://query.yahooapis.com/v1/public/yql");
-    }
-
-    @Override
-    public void setComponents(Map<String, Resource> resources, Properties config) {
-        // do nothing
     }
 
     @Override

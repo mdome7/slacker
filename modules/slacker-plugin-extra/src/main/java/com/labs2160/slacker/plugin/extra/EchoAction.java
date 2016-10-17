@@ -1,13 +1,9 @@
 package com.labs2160.slacker.plugin.extra;
 
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.Resource;
+import com.labs2160.slacker.api.SimpleAbstractAction;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.annotation.ActionDescription;
-
-import java.util.Map;
-import java.util.Properties;
 
 @ActionDescription(
         name = "Echo",
@@ -15,12 +11,7 @@ import java.util.Properties;
         argsSpec = "<string to echo back>",
         argsExample = "\"hello world\""
 )
-public class EchoAction implements Action {
-
-    @Override
-    public void setComponents(Map<String, Resource> resources, Properties config) {
-        // do nothing
-    }
+public class EchoAction extends SimpleAbstractAction {
 
     @Override
     public boolean execute(SlackerContext ctx) throws SlackerException {

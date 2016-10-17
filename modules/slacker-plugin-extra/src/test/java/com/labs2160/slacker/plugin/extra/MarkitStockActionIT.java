@@ -1,4 +1,4 @@
-package com.labs2160.slacker.plugin.misc;
+package com.labs2160.slacker.plugin.extra;
 
 import junit.framework.Assert;
 
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.SlackerContext;
-import com.labs2160.slacker.plugin.extra.MarkitStockAction;
 
 public class MarkitStockActionIT {
 

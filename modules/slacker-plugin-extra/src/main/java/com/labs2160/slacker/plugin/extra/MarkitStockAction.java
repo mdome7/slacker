@@ -37,7 +37,7 @@ import java.util.Properties;
         argsSpec = "<stock symbol>",
         argsExample = "AAPL"
 )
-public class MarkitStockAction implements Action {
+public class MarkitStockAction extends SimpleAbstractAction {
 
     private final static Logger logger = LoggerFactory.getLogger(MarkitStockAction.class);
 
@@ -46,11 +46,6 @@ public class MarkitStockAction implements Action {
     public MarkitStockAction() {
         Client client = ClientBuilder.newClient(new ClientConfig());
         target = client.target("http://dev.markitondemand.com/Api/v2/Quote/json");
-    }
-
-    @Override
-    public void setComponents(Map<String, Resource> resources, Properties config) {
-        // do nothing
     }
 
     @Override

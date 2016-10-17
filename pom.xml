@@ -6,7 +6,7 @@
     <artifactId>slacker-parent</artifactId>
     <name>slacker-parent</name>
     <packaging>pom</packaging>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
     <properties>
         <skipTests>true</skipTests>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>

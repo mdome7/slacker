@@ -1,4 +1,4 @@
-package com.labs2160.slacker.plugin.misc;
+package com.labs2160.slacker.plugin.extra;
 
 import java.io.IOException;
 import java.net.URL;

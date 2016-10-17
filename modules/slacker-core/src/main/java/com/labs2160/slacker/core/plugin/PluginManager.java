@@ -4,7 +4,8 @@ import com.labs2160.slacker.api.Action;
 import com.labs2160.slacker.api.Endpoint;
 import com.labs2160.slacker.api.RequestCollector;
 import com.labs2160.slacker.api.Resource;
-import com.labs2160.slacker.core.InitializationException;
+import com.labs2160.slacker.api.InitializationException;
+import com.labs2160.slacker.core.ConfigurationException;
 import com.labs2160.slacker.core.lib.DirClassLoaderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class PluginManager {
         } else {
             pluginCl = clRegistry.getClassLoader(pluginName);
             if (pluginCl == null) {
-                throw new InitializationException("Cannot find plugin \"" + pluginName + "\""); // TODO throw better exception
+                throw new ConfigurationException("Cannot find plugin \"" + pluginName + "\""); // TODO throw better exception
             }
         }
         try {
@@ -67,8 +68,8 @@ public class PluginManager {
             } else {
                 throw new InitializationException("Cannot instantiate action - class " + className + " does not extend " + Action.class.getName());
             }
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            throw new InitializationException("Cannot instantiate action (" + pluginName + ") " + className, e);
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InitializationException e) {
+            throw new ConfigurationException("Cannot instantiate action (" + pluginName + ") " + className, e);
         }
     }
 }
