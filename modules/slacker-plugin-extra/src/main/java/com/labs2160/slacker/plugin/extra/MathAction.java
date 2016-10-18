@@ -3,6 +3,8 @@ package com.labs2160.slacker.plugin.extra;
 import com.labs2160.slacker.api.*;
 import com.labs2160.slacker.api.annotation.ActionDescription;
 import com.labs2160.slacker.api.annotation.ConfigParam;
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
 
@@ -38,7 +40,7 @@ public class MathAction implements Action {
     }
 
     @Override
-    public boolean execute(SlackerContext ctx) throws SlackerException {
+    public SlackerOutput execute(SlackerContext ctx) throws SlackerException {
         if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
             throw new NoArgumentsFoundException("Arguments required");
         }
@@ -48,16 +50,15 @@ public class MathAction implements Action {
             double result = evaluator.getNumberResult(expr);
 
             if (result == Math.floor(result) || digitsAfterDecimal == 0) {
-                ctx.setResponseMessage(Long.toString(Math.round(result)));
+                return new TextOutput(Long.toString(Math.round(result)));
             } else {
                 double m = Math.pow(10, digitsAfterDecimal);
                 result = Math.round(result * m)/m;
-                ctx.setResponseMessage(Double.toString(result));
+                return new TextOutput(Double.toString(result));
             }
         } catch (EvaluationException e) {
             throw new SlackerException("Could not evaluate expression: " + expr, e);
         }
-        return true;
     }
 
     private String join(String [] tokens) {

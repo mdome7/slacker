@@ -1,12 +1,11 @@
 package com.labs2160.slacker.api;
 
 /**
- * TODO: Add source info
- * @author mike
- *
+ * Encapsulates a request.
  */
 public class SlackerRequest {
 
+	/** component (i.e. Collector, Trigger) where the request came from */
 	private String source;
 	
 	private String [] rawArguments;

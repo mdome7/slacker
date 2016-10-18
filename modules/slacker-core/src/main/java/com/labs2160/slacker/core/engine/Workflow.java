@@ -86,4 +86,8 @@ public class Workflow {
 	public void setArgsSpecification(String argsSpecification) {
 		this.argsSpecification = argsSpecification;
 	}
+
+	public String toString() {
+		return name;
+	}
 }

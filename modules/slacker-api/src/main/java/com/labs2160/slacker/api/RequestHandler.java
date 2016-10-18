@@ -1,5 +1,7 @@
 package com.labs2160.slacker.api;
 
+import com.labs2160.slacker.api.response.SlackerOutput;
+
 import java.util.concurrent.Future;
 
 public interface RequestHandler {
@@ -14,5 +16,5 @@ public interface RequestHandler {
      *
      * TODO: return Response instead of SlackerContext
      */
-	Future<SlackerResponse> handle(SlackerRequest request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException;
+	Future<SlackerOutput> handle(SlackerRequest request) throws InvalidRequestException, NoArgumentsFoundException, SlackerException;
 }

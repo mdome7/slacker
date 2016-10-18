@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labs2160.slacker.api.*;
 import com.labs2160.slacker.api.annotation.ActionDescription;
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Arguments: zip_code -
+ * Arguments: zip_code or city
  * Output Message: weather prediction for today
  */
 @ActionDescription(
@@ -37,7 +39,7 @@ public class WeatherAction extends SimpleAbstractAction {
     }
 
     @Override
-    public boolean execute(SlackerContext ctx) throws SlackerException {
+    public SlackerOutput execute(SlackerContext ctx) throws SlackerException {
         try {
             if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
                 throw new NoArgumentsFoundException("Location info argument is required");
@@ -56,14 +58,11 @@ public class WeatherAction extends SimpleAbstractAction {
             YahooResponse<WeatherResults> response = mapper.readValue(json, new TypeReference<YahooResponse<WeatherResults>>() {});
 
             WeatherResults results = response.getResults();
-            ctx.setResponseMessage(results != null ? results.toString() : "Sorry, cannot retrieve weather for: " + input );
-
-            return true;
+            return new TextOutput(results != null ? results.toString() : "Sorry, cannot retrieve weather for: " + input );
         } catch (IOException e) {
             logger.warn("Error while trying to retrieve weather for: {}", ctx.getRequestArgs(), e);
-            //throw new SlackerException("Error while retrieving weather info", e);
+            throw new SlackerException("Error while retrieving weather info", e);
         }
-        return false;
     }
 
 }

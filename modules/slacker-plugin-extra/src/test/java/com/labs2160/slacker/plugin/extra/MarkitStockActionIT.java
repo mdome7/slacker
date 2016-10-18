@@ -1,5 +1,7 @@
 package com.labs2160.slacker.plugin.extra;
 
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 import junit.framework.Assert;
 
 import org.junit.Before;
@@ -43,7 +45,8 @@ public class MarkitStockActionIT {
 
 	private String getStock(String symbol) throws SlackerException {
 		SlackerContext ctx = new SlackerContext(new String [] {"stock"}, new String [] {symbol});
-		Assert.assertTrue(action.execute(ctx));
-		return ctx.getResponse().getMessage();
+		SlackerOutput output = action.execute(ctx);
+		Assert.assertTrue(output instanceof TextOutput);
+		return ((TextOutput) output).getMessage();
 	}
 }

@@ -1,6 +1,7 @@
 package com.labs2160.slacker.plugin.extra;
 
 import com.labs2160.slacker.api.*;
+import com.labs2160.slacker.api.response.SlackerOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +37,8 @@ public class SchedulerTrigger implements Trigger {
                 try {
                     String[] tokens = request.split(" ");
                     SlackerRequest sr = new SlackerRequest("trigger", tokens);
-                    Future<SlackerResponse> future = handler.handle(sr);
-                    SlackerResponse response = future.get();
+                    Future<SlackerOutput> future = handler.handle(sr);
+                    SlackerOutput response = future.get();
                     logger.info("Request {} succeeded with response {}", request, response);
                 } catch (Exception e) {
                     logger.error("Could not process request '{}' due to error {}.", request, e);

@@ -1,3 +1,6 @@
+variables:
+  - &DEFAULT_RESPONSE I'm still here
+
 collectors:
   - name: REST API
     className: com.labs2160.slacker.plugin.rs.RESTCollector
@@ -35,4 +38,14 @@ workflows:
     action:
       className: com.labs2160.slacker.plugin.extra.StaticResponseAction
       configuration:
-        response: "What's up"
+        response: *DEFAULT_RESPONSE
+
+  - name: URL Encoder
+    alias: url encode
+    action:
+      className: com.labs2160.slacker.plugin.extra.developer.URLEncodeAction
+
+  - name: URL Decoder
+    alias: url decode
+    action:
+      className: com.labs2160.slacker.plugin.extra.developer.URLDecodeAction

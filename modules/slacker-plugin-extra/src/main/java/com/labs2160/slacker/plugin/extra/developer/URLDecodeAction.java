@@ -4,6 +4,8 @@ import com.labs2160.slacker.api.NoArgumentsFoundException;
 import com.labs2160.slacker.api.SimpleAbstractAction;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -17,7 +19,7 @@ public class URLDecodeAction extends SimpleAbstractAction {
     private final static String DEFAULT_CHARSET = "UTF-8";
 
     @Override
-    public boolean execute(SlackerContext ctx) throws SlackerException {
+    public SlackerOutput execute(SlackerContext ctx) throws SlackerException {
         String [] args = ctx.getRequestArgs();
         if (args.length == 0) {
             throw new NoArgumentsFoundException("Arguments required");
@@ -29,12 +31,11 @@ public class URLDecodeAction extends SimpleAbstractAction {
             }
 
             try {
-                ctx.setResponseMessage(URLDecoder.decode(sb.toString(), DEFAULT_CHARSET));
+                return new TextOutput(URLDecoder.decode(sb.toString(), DEFAULT_CHARSET));
             } catch (UnsupportedEncodingException e) {
                 // shouldn't happen unless charset is customizable and set to an invalid value
                 throw new SlackerException("Error url encoding string using charset=" + DEFAULT_CHARSET + ", string=" + sb.toString());
             }
         }
-        return true;
     }
 }

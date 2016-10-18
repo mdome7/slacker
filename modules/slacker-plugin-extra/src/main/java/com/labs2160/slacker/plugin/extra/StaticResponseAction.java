@@ -3,6 +3,8 @@ package com.labs2160.slacker.plugin.extra;
 import com.labs2160.slacker.api.*;
 import com.labs2160.slacker.api.annotation.ActionDescription;
 import com.labs2160.slacker.api.annotation.ConfigParam;
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 
 import java.util.Map;
 import java.util.Properties;
@@ -24,8 +26,7 @@ public class StaticResponseAction implements Action {
     }
 
     @Override
-    public boolean execute(SlackerContext ctx) throws SlackerException {
-        ctx.setResponseMessage(response);
-        return true;
+    public SlackerOutput execute(SlackerContext ctx) throws SlackerException {
+        return new TextOutput(response);
     }
 }

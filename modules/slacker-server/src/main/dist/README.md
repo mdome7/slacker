@@ -16,7 +16,11 @@ of the unzipped package.
 Unzip plugins in the BASE_DIR/plugins directory
 
 ## Cool Stuff
+Try it out:
+
+```
 curl http://localhost:7000/?request=stock%20aapl
 curl http://localhost:7000/?request=weather%20seattle
 curl http://localhost:7000?request=calc%207*191
 curl http://localhost:7000?request=pick%202%20larry%20moe%20curly
+```

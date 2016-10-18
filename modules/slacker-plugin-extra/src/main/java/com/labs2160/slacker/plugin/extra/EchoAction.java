@@ -4,6 +4,8 @@ import com.labs2160.slacker.api.SimpleAbstractAction;
 import com.labs2160.slacker.api.SlackerContext;
 import com.labs2160.slacker.api.SlackerException;
 import com.labs2160.slacker.api.annotation.ActionDescription;
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 
 @ActionDescription(
         name = "Echo",
@@ -14,18 +16,17 @@ import com.labs2160.slacker.api.annotation.ActionDescription;
 public class EchoAction extends SimpleAbstractAction {
 
     @Override
-    public boolean execute(SlackerContext ctx) throws SlackerException {
+    public SlackerOutput execute(SlackerContext ctx) throws SlackerException {
         String [] args = ctx.getRequestArgs();
         if (args.length == 0) {
-            ctx.setResponseMessage("... echo!!");
+            return new TextOutput("... echo!!");
         } else {
             StringBuilder sb = new StringBuilder("...");
             for (int i = 0; i < args.length; i++) {
                 sb.append(" ");
                 sb.append(args[i]);
             }
-            ctx.setResponseMessage(sb.toString());
+            return new TextOutput(sb.toString());
         }
-        return true;
     }
 }

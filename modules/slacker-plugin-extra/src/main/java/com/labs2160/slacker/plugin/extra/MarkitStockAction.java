@@ -2,6 +2,8 @@ package com.labs2160.slacker.plugin.extra;
 
 import com.labs2160.slacker.api.*;
 import com.labs2160.slacker.api.annotation.ActionDescription;
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +12,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * {
@@ -49,7 +49,7 @@ public class MarkitStockAction extends SimpleAbstractAction {
     }
 
     @Override
-    public boolean execute(SlackerContext ctx) throws SlackerException {
+    public SlackerOutput execute(SlackerContext ctx) throws SlackerException {
         if (ctx.getRequestArgs() == null || ctx.getRequestArgs().length == 0) {
             throw new NoArgumentsFoundException("Stock symbol argument is required");
         }
@@ -58,11 +58,9 @@ public class MarkitStockAction extends SimpleAbstractAction {
                 .request().accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(MarkitStockInfo.class);
         if (stock.getMessage() != null && stock.getMessage().startsWith("No symbol matches")) {
-            ctx.setResponseMessage("No match found for symbol: " + stockSymbol);
+            return new TextOutput("No match found for symbol: " + stockSymbol);
         } else {
-            ctx.setResponseMessage(stock.toString());
+            return new TextOutput(stock.toString());
         }
-        //ctx.setOutputMessage("87.99");
-        return true;
     }
 }

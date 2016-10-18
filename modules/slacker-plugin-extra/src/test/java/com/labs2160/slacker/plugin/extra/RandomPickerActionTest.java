@@ -1,5 +1,7 @@
 package com.labs2160.slacker.plugin.extra;
 
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 import junit.framework.Assert;
 
 import org.junit.BeforeClass;
@@ -26,42 +28,37 @@ public class RandomPickerActionTest {
 
 	@Test
 	public void testSinglePick() throws SlackerException {
-		final int num = 1;
-		SlackerContext ctx = new SlackerContext(FAKE_PATH, new String[]{"" + num, "a", "b", "c"});
-		action.execute(ctx);
-		String [] pickedStr = ctx.getResponse().getMessage().split(" ");
-		Assert.assertEquals(1, pickedStr.length);
-		logger.debug("Pick {}: {}", num, pickedStr);
+		boolean pickedA = false;
+		boolean pickedB = false;
+		boolean pickedC = false;
+		int maxIter = 300;
+		int iter = 0;
+		while((!pickedA || !pickedB || !pickedC) && iter++ < maxIter) {
+			String output = pick(1, "a b c");
+			Assert.assertEquals(1, output.split(" ").length);
+			if ("a".equals(output)) pickedA = true;
+			if ("b".equals(output)) pickedB = true;
+			if ("c".equals(output)) pickedC = true;
+		}
+		logger.info("Number of iterations to pick each at least once: {}", iter);
 	}
 
 	@Test
 	public void testMultiPick() throws SlackerException {
-		final int num = 2;
-		SlackerContext ctx = new SlackerContext(FAKE_PATH, new String[]{"" + num, "a", "b", "c"});
-		action.execute(ctx);
-		String [] pickedStr = ctx.getResponse().getMessage().split(" ");
-		Assert.assertEquals(2, pickedStr.length);
-		logger.debug("Pick {}: {}", num, pickedStr);
+		String output = pick(2, "a b c");
+		Assert.assertEquals(2, output.split(" ").length);
 	}
 
 	@Test
 	public void testPickAll() throws SlackerException {
-		final int num = 3;
-		SlackerContext ctx = new SlackerContext(FAKE_PATH, new String[]{"" + num, "a", "b", "c"});
-		action.execute(ctx);
-		String [] pickedStr = ctx.getResponse().getMessage().split(" ");
-		Assert.assertEquals(num, pickedStr.length);
-		logger.debug("Pick {}: {}", num, pickedStr);
+		String output = pick(3, "a b c");
+		Assert.assertEquals(3, output.split(" ").length);
 	}
 
 	@Test
 	public void testPickOverflow() throws SlackerException {
-		final int num = 4;
-		SlackerContext ctx = new SlackerContext(FAKE_PATH, new String[]{"" + num, "a", "b", "c"});
-		action.execute(ctx);
-		String [] pickedStr = ctx.getResponse().getMessage().split(" ");
-		Assert.assertEquals(3, pickedStr.length);
-		logger.debug("Pick {}: {}", num, pickedStr);
+		String output = pick(4, "a b c");
+		Assert.assertEquals(3, output.split(" ").length);
 	}
 
 	@Test(expected=InvalidRequestException.class)
@@ -80,5 +77,15 @@ public class RandomPickerActionTest {
 	public void testPickInvalidNumber() throws SlackerException {
 		SlackerContext ctx = new SlackerContext(FAKE_PATH, new String[]{"a", "b", "c"});
 		action.execute(ctx);
+	}
+
+	private String pick(int pickCount, String choices) throws SlackerException {
+		SlackerContext ctx = new SlackerContext(FAKE_PATH, (pickCount + " " + choices).split(" "));
+		logger.debug("Picking {} from: {}", pickCount, choices);
+		SlackerOutput output = action.execute(ctx);
+		org.junit.Assert.assertTrue(output instanceof TextOutput);
+		String message = ((TextOutput) output).getMessage();
+		logger.debug("\t=> {}", message);
+		return message;
 	}
 }

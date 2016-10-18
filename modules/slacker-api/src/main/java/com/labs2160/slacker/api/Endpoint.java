@@ -1,13 +1,15 @@
 package com.labs2160.slacker.api;
 
-public interface Endpoint extends WorkflowComponent {
+import com.labs2160.slacker.api.response.SlackerOutput;
+
+public interface Endpoint <O extends SlackerOutput> extends WorkflowComponent {
 
 	/**
-	 * Deliver the action's response to the endpoint
-	 * @param response
+	 * Deliver a workflow output to the endpoint
+	 * @param output
 	 * @return true if the response is sent successfully, false otherwise
 	 * @throws SlackerException
 	 */
-	boolean deliverResponse(SlackerResponse response) throws SlackerException;
+	boolean deliverResponse(O output) throws SlackerException;
 
 }

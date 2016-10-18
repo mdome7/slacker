@@ -2,6 +2,8 @@ package com.labs2160.slacker.plugin.extra;
 
 import com.labs2160.slacker.api.*;
 import com.labs2160.slacker.api.annotation.ActionDescription;
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 import java.security.SecureRandom;
@@ -19,7 +21,7 @@ public class RandomPickerAction extends SimpleAbstractAction {
     private static final SecureRandom RANDOM = new SecureRandom(Long.toString(System.currentTimeMillis()).getBytes());
 
     @Override
-    public boolean execute(SlackerContext ctx) throws SlackerException {
+    public SlackerOutput execute(SlackerContext ctx) throws SlackerException {
         String [] args = ctx.getRequestArgs();
         try {
             if (args.length < 3) {
@@ -31,18 +33,18 @@ public class RandomPickerAction extends SimpleAbstractAction {
             } else {
                 String [] choices = Arrays.copyOfRange(args, 1, args.length);
                 toPick = Math.min(toPick, choices.length);
+                int upperBound = choices.length;
 
                 String [] picked = new String[toPick];
                 do {
-                    int p = RANDOM.nextInt(toPick);
+                    int p = RANDOM.nextInt(upperBound--);
                     picked[--toPick] = choices[p];
-                    if (p < toPick) {
-                        choices[p] = choices[toPick];
+                    if (p < upperBound) {
+                        choices[p] = choices[upperBound];
                     }
                 } while (toPick > 0);
-                ctx.setResponseMessage(join(picked));
+                return new TextOutput(join(picked));
             }
-            return true;
         } catch (NumberFormatException e) {
             throw new InvalidRequestException("First argument has to be a number but was \"" + args[0] + "\"");
         }

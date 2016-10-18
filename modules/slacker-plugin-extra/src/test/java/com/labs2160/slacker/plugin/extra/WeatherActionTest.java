@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.labs2160.slacker.api.response.SlackerOutput;
+import com.labs2160.slacker.api.response.TextOutput;
 import junit.framework.Assert;
 
 import org.junit.Before;
@@ -68,7 +70,8 @@ public class WeatherActionTest {
 
 	private String getWeather(String text) throws SlackerException {
 		SlackerContext ctx = new SlackerContext(new String [] {"weather"}, new String [] {text});
-		Assert.assertTrue(action.execute(ctx));
-		return ctx.getResponse().getMessage();
+		SlackerOutput output = action.execute(ctx);
+		org.junit.Assert.assertTrue(output instanceof TextOutput);
+		return ((TextOutput) output).getMessage();
 	}
 }

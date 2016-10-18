@@ -1,5 +1,7 @@
 package com.labs2160.slacker.api;
 
+import com.labs2160.slacker.api.response.SlackerOutput;
+
 public interface Action extends WorkflowComponent {
 
 	/**
@@ -8,5 +10,5 @@ public interface Action extends WorkflowComponent {
 	 * @return true if the workflow should continue normally, false if error (check ctx.getException())
 	 * @throws SlackerException
 	 */
-	boolean execute(SlackerContext ctx) throws SlackerException;
+	SlackerOutput execute(SlackerContext ctx) throws SlackerException;
 }
