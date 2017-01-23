@@ -34,14 +34,14 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
     private final List<WorkflowExecutionListener> executionListeners;
 
-    /** in-memory registry of all triggers */
-    private final Map<String,Trigger> triggers;
+    /** in-memory registry of all schedules */
+    private final Map<String,SchedulerTask> schedules;
 
     public WorkflowEngineImpl() {
         registry = new WorkflowRegistry();
         collectors = new ConcurrentHashMap<>();
         executionListeners = new ArrayList<>();
-        triggers = new ConcurrentHashMap<>();
+        schedules = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -50,42 +50,27 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         logger.debug("Starting engine...");
 
         executorService = Executors.newFixedThreadPool(5); // TODO: parameterize
-        scheduler = new EngineScheduler();
+        scheduler = new EngineScheduler(this);
 
         for (String collectorName : collectors.keySet()) {
             try {
                 logger.debug("Starting collector: {}", collectorName);
                 RequestCollector collector = collectors.get(collectorName);
                 collector.start(this);
-
-                SchedulerTask [] tasks = collector.getSchedulerTasks();
-                if (tasks != null) {
-                    for (SchedulerTask task : tasks) {
-                        scheduler.schedule(task);
-                    }
-                }
-
             } catch (Exception e) {
                 logger.error("Could not start collector {} due to error.", collectorName, e);
                 logger.warn("Skipping collector {} but will continue startup.", collectorName);
             }
         }
 
-        for (String triggerName : triggers.keySet()) {
+        for (String scheduleName : schedules.keySet()) {
             try {
-                logger.debug("Starting trigger: {}", triggerName);
-                Trigger trigger = triggers.get(triggerName);
-                trigger.start(this);
-
-                SchedulerTask [] tasks = trigger.getSchedulerTasks();
-                if (tasks != null) {
-                    for (SchedulerTask task : tasks) {
-                        scheduler.schedule(task);
-                    }
-                }
+                SchedulerTask task = schedules.get(scheduleName);
+                logger.debug("Starting schedule: {} ({})", scheduleName, task.getSchedule());
+                scheduler.schedule(task);
             } catch (Exception e) {
-                logger.error("Could not start trigger {} due to error.", triggerName, e);
-                logger.warn("Skipping trigger {} but will continue startup.", triggerName);
+                logger.error("Could not start schedule {} due to error.", scheduleName, e);
+                logger.warn("Skipping schedule {} but will continue startup.", scheduleName);
             }
         }
         scheduler.start();
@@ -111,9 +96,9 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         logger.info("Added workflow: {} - {}", path, wf.getName());
     }
 
-    public void addTrigger(String name, Trigger trigger) {
-        triggers.put(name, trigger);
-        logger.info("Trigger \"{}\" added", name);
+    public void addSchedule(String name, SchedulerTask schedule) {
+        schedules.put(name, schedule);
+        logger.info("Schedule \"{}\" added", name);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class DirClassLoaderRegistry {
             public boolean accept(Path entry) throws IOException { return Files.isDirectory(entry); }
         };
 
-        logger.info("Creating ClassLoaders for base directory: {}", baseDirectory.toString());
+        logger.info("Creating ClassLoaders for base directory: {}", baseDirectory);
 
         try (DirectoryStream<Path> dirs = Files.newDirectoryStream(baseDirectory, filter)) {
             for (Path dir : dirs) {

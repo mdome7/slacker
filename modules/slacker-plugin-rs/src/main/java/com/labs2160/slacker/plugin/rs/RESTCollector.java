@@ -1,6 +1,9 @@
 package com.labs2160.slacker.plugin.rs;
 
-import com.labs2160.slacker.api.*;
+import com.labs2160.slacker.api.InitializationException;
+import com.labs2160.slacker.api.RequestCollector;
+import com.labs2160.slacker.api.RequestHandler;
+import com.labs2160.slacker.api.Resource;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -76,12 +79,6 @@ public class RESTCollector implements RequestCollector {
     @Override
     public boolean isActive() {
         return server != null && server.isRunning();
-    }
-
-    @Override
-    public SchedulerTask[] getSchedulerTasks() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override

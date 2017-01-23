@@ -18,10 +18,4 @@ public interface RequestCollector extends WorkflowComponent {
 	void shutdown();
 
 	boolean isActive();
-
-	/**
-	 * Get SchedulerTasks that should be managed and run by the engine.
-	 * @return
-	 */
-	SchedulerTask [] getSchedulerTasks();
 }

@@ -1,6 +1,8 @@
 package com.labs2160.slacker.core.engine;
 
-import com.labs2160.slacker.api.SchedulerTask;
+import com.labs2160.slacker.api.RequestHandler;
+import com.labs2160.slacker.api.SlackerException;
+import com.labs2160.slacker.api.SlackerRequest;
 import it.sauronsoftware.cron4j.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,10 +10,13 @@ import org.slf4j.LoggerFactory;
 public class EngineScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(EngineScheduler.class);
-    private Scheduler scheduler;
 
-    public EngineScheduler() {
+    private final RequestHandler requestHandler;
+    private final Scheduler scheduler;
+
+    public EngineScheduler(RequestHandler requestHandler) {
         scheduler = new Scheduler();
+        this.requestHandler = requestHandler;
     }
 
     public void start() {
@@ -34,12 +39,17 @@ public class EngineScheduler {
      * @return Task ID
      */
     public String schedule(final SchedulerTask task) {
-        String taskId = scheduler.schedule(task.getSchedulingPattern(), new Runnable() {
+        String taskId = scheduler.schedule(task.getSchedule(), new Runnable() {
             public void run() {
-                task.execute();
+                try {
+                    SlackerRequest request = new SlackerRequest(EngineScheduler.class.getSimpleName(), task.getWorkflowAlias().split(","));
+                    requestHandler.handle(request);
+                } catch (SlackerException e) {
+                    logger.error("Error executing schedule \"" + task.getName() + "\"", e);
+                }
             }
         });
-        logger.info("EngineScheduler scheduled task {} with time interval {}", taskId, task.getSchedulingPattern());
+        logger.info("EngineScheduler scheduled task {} with schedule: {}", taskId, task.getSchedule());
         return taskId;
     }
 }

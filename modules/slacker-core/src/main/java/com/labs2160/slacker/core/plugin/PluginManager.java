@@ -1,10 +1,6 @@
 package com.labs2160.slacker.core.plugin;
 
-import com.labs2160.slacker.api.Action;
-import com.labs2160.slacker.api.Endpoint;
-import com.labs2160.slacker.api.RequestCollector;
-import com.labs2160.slacker.api.Resource;
-import com.labs2160.slacker.api.InitializationException;
+import com.labs2160.slacker.api.*;
 import com.labs2160.slacker.core.ConfigurationException;
 import com.labs2160.slacker.core.lib.DirClassLoaderRegistry;
 import org.slf4j.Logger;

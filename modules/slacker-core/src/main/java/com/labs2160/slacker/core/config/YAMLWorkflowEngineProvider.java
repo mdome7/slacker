@@ -1,7 +1,7 @@
 package com.labs2160.slacker.core.config;
 
 import com.labs2160.slacker.api.*;
-import com.labs2160.slacker.api.InitializationException;
+import com.labs2160.slacker.core.engine.SchedulerTask;
 import com.labs2160.slacker.core.engine.Workflow;
 import com.labs2160.slacker.core.engine.WorkflowEngine;
 import com.labs2160.slacker.core.engine.WorkflowEngineImpl;
@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,7 @@ public class YAMLWorkflowEngineProvider {
             resources = provideResources(parseList(configuration, "resources", false));
             initializeCollectors(engine, parseList(configuration, "collectors", true));
             initializeWorkflows(engine, parseList(configuration, "workflows", true));
-            initializeTriggers(engine, parseList(configuration, "triggers", false));
+            initializeSchedules(engine, parseList(configuration, "schedules", false));
             logger.debug("Engine initialized in {} ms", System.currentTimeMillis() - start);
             return engine;
         } catch (Exception e) {
@@ -173,34 +172,18 @@ public class YAMLWorkflowEngineProvider {
         return endpoint;
     }
 
-    /**
-     * TODO: THIS NEEDS TO BE REDONE
-     * @param engine
-     * @param triggers
-     */
-    @SuppressWarnings("unchecked")
-    private void initializeTriggers(WorkflowEngineImpl engine, List<?> triggers) throws InitializationException {
-        if (triggers == null) {
+    private void initializeSchedules(WorkflowEngineImpl engine, List<?> schedules) throws InitializationException {
+        if (schedules == null) {
             // No triggers in config
             return;
         }
-        for (Object entry : triggers) {
+        for (Object entry : schedules) {
             Map<String,?> triggerEntry = (Map<String,?>) entry;
-            final String name = parseString(triggerEntry, "name", true);
-            final String triggerClass = parseString(triggerEntry, "triggerClass", true);
-            final Properties configuration = parseProperties(triggerEntry, "configuration", false);
-            try {
-                logger.info("Initializing trigger: {}", name);
-                Class<?> clazz = Class.forName(triggerClass);
-                if (!Trigger.class.isAssignableFrom(clazz)) {
-                    throw new InitializationException("Class " + clazz.getName() + " must implement " + Trigger.class.getName());
-                }
-                Trigger trigger = (Trigger) clazz.getConstructor().newInstance();
-                trigger.setComponents(resources, configuration);
-                engine.addTrigger(name, trigger);
-            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new InitializationException("Could not initialize trigger \"" + name + "\": " + e.getMessage(), e);
-            }
+            SchedulerTask task = new SchedulerTask(
+                    parseString(triggerEntry, "name", true),
+                    parseString(triggerEntry, "schedule", true),
+                    parseString(triggerEntry, "workflowAlias", true));
+            engine.addSchedule(task.getName(), task);
         }
     }
 

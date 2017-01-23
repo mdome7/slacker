@@ -35,6 +35,7 @@ public class MainServer {
         try {
             weld.initialize();
 
+            logger.info("Starting Slacker...");
             server = startServer(args);
             server.join();
         } finally {

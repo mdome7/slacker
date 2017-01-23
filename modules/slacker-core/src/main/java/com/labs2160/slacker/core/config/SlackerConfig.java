@@ -1,10 +1,9 @@
 package com.labs2160.slacker.core.config;
 
+import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
-
-import javax.inject.Singleton;
 
 @Singleton
 public class SlackerConfig {
@@ -35,8 +34,8 @@ public class SlackerConfig {
     public SlackerConfig(Properties properties) {
         this.properties = properties;
         maxThreads = getIntProperty(PARAM_MAX_THREADS, DEFAULT_MAX_THREADS);
-        configFile = getPathProperty(PARAM_CONFIG);
-        pluginDir = getPathProperty(PARAM_PLUGIN_DIR);
+        configFile = getPathProperty(PARAM_CONFIG, "config.yaml");
+        pluginDir = getPathProperty(PARAM_PLUGIN_DIR, ".");
     }
 
     public int getMaxThreads() {
@@ -64,11 +63,15 @@ public class SlackerConfig {
     }
 
     private Path getPathProperty(String key) {
+        return getPathProperty(key, null);
+    }
+
+    private Path getPathProperty(String key, String defaultValue) {
         String p = getStringProperty(key);
         if (p != null) {
             return Paths.get(p);
         }
-        return null;
+        return Paths.get(defaultValue);
     }
 
     private String getStringProperty(String key) {

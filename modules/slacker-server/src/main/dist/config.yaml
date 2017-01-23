@@ -1,6 +1,11 @@
 variables:
   - &DEFAULT_RESPONSE I'm still here
 
+schedules:
+  - name: Hey Every Minute
+    schedule: "* * * * *"
+    workflowAlias: hey
+
 collectors:
   - name: REST API
     className: com.labs2160.slacker.plugin.rs.RESTCollector

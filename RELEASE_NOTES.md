@@ -1,5 +1,11 @@
 # Releases
 
+## 3.0
+* Changed Trigger signature
+
+## v2.0
+* Changed Action signature to return SlackerOutput
+
 ## v1.4
 * Cleaned up interfaces
 * Cleaner config structure and reusable variables
