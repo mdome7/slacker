@@ -112,15 +112,36 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         return this.executorService.submit(new Callable<SlackerOutput>() {
             @Override
             public SlackerOutput call() throws Exception {
-                if (request.getRawArguments()[0].equals(HELP_KEY)) {
-                    return handleHelp();
-                } else {
-                    final WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
-                    logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
-                    return executeWorkflow(wfr);
-                }
+                ExecutionDetails details = executeRequest(request);
+                return details.getOutput();
             }
         });
+    }
+
+    @Override
+    public Future<ExecutionDetails> handleRequest(final SlackerRequest request) {
+        return this.executorService.submit(new Callable<ExecutionDetails>() {
+            @Override
+            public ExecutionDetails call() throws Exception {
+                return executeRequest(request);
+            }
+        });
+    }
+
+    private ExecutionDetails executeRequest(final SlackerRequest request) throws SlackerException {
+        String workflowName = null;
+        SlackerOutput output = null;
+        long start = System.currentTimeMillis();
+        if (request.getRawArguments()[0].equals(HELP_KEY)) {
+            workflowName = HELP_KEY;
+            output = handleHelp();
+        } else {
+            final WorkflowRequest wfr = parseWorkflowRequest(request.getRawArguments());
+            logger.debug("Request submitted: path={}, wf={}, args={}", wfr.getPath(), wfr.getWorkflow(), wfr.getArgs());
+            output = executeWorkflow(wfr);
+            workflowName = wfr.getWorkflow().getName();
+        }
+        return new ExecutionDetails(workflowName, start, System.currentTimeMillis(), output);
     }
 
     private SlackerOutput executeWorkflow(WorkflowRequest wfr) throws SlackerException {
@@ -199,7 +220,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
     }
 
     /**
-     * TODO: move this out of the engine.
+     * TODO: move this out of the engine and into a special workflow definition.
      * @return
      */
     private SlackerOutput handleHelp() {
