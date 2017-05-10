@@ -54,7 +54,7 @@ public class EngineScheduler {
             public void run() {
                 try {
                     logger.debug("Firing task \"{}\" (count={})", task.getName(), task.getExecutionCount());
-                    SlackerRequest request = new SlackerRequest(EngineScheduler.class.getSimpleName(), task.getWorkflowAlias().split(","));
+                    SlackerRequest request = new SlackerRequest(EngineScheduler.class.getSimpleName(), task.getWorkflowAlias().split(" "));
                     Future<ExecutionDetails> executionDetails = workflowEngine.handleRequest(request);
 
                     task.setLastExecutionDetails(executionDetails.get());
