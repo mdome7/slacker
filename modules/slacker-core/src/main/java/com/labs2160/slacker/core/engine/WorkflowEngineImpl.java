@@ -52,16 +52,24 @@ public class WorkflowEngineImpl implements WorkflowEngine {
         executorService = Executors.newFixedThreadPool(5); // TODO: parameterize
         scheduler = new EngineScheduler(this);
 
-        for (String collectorName : collectors.keySet()) {
-            try {
-                logger.debug("Starting collector: {}", collectorName);
-                RequestCollector collector = collectors.get(collectorName);
-                collector.start(this);
-            } catch (Exception e) {
-                logger.error("Could not start collector {} due to error.", collectorName, e);
-                logger.warn("Skipping collector {} but will continue startup.", collectorName);
-            }
-        }
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		try {
+			for (String collectorName : collectors.keySet()) {
+				try {
+					logger.debug("Starting collector: {}", collectorName);
+					RequestCollector collector = collectors.get(collectorName);
+
+					// set context class loader before starting Collector
+					Thread.currentThread().setContextClassLoader(collector.getClass().getClassLoader());
+					collector.start(this);
+				} catch (Exception e) {
+					logger.error("Could not start collector {} due to error.", collectorName, e);
+					logger.warn("Skipping collector {} but will continue startup.", collectorName);
+				}
+			}
+		} finally {
+			Thread.currentThread().setContextClassLoader(cl);
+		}
 
         for (String scheduleName : schedules.keySet()) {
             try {

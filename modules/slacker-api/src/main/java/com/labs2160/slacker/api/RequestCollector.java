@@ -13,7 +13,7 @@ public interface RequestCollector extends WorkflowComponent {
 	 * Start the collector.
 	 * @param handler used for processing any requests this collector may generate
 	 */
-	void start(RequestHandler handler);
+	void start(RequestHandler handler) throws InitializationException;
 
 	void shutdown();
 
